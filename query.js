@@ -4,10 +4,7 @@ var select = require('./select')
 
 function id (e) { return e }
 
-module.exports = function (indexes, query, encode) {
-  var index = select(indexes, query)
-
-  encode = encode || id
+module.exports = function (index, query) {
 
   function bound (value, range, sentinel) {
     return (
@@ -35,12 +32,5 @@ module.exports = function (indexes, query, encode) {
   }
 
 }
-
-
-
-
-
-
-
 
 
