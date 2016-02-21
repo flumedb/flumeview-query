@@ -15,9 +15,18 @@ function has (key, obj) {
   Object.hasOwnProperty(obj, key)
 }
 
-module.exports = function (path, links, version, codec) {
+module.exports = function (path, indexes, links, version, codec) {
   codec = codec || require('bytewise')
   var db = level(path)
+
+  if('string' !== typeof path)
+    throw new Error('must provide path for leveldb instance')
+  if(!Array.isArray(indexes))
+    throw new Error('must provide an array of indexes')
+  if('function' !== typeof links)
+    throw new Error('must provide links function')
+  if('number' !== typeof version)
+    throw new Error('must provide version number')
 
   //always write metada to the lowest key,
   //so the indexes do not interfeer
@@ -25,12 +34,6 @@ module.exports = function (path, links, version, codec) {
   //because then we can't change the codec safely
   //(prehaps the encoding of META is also some indexed value in another codec?)
   var META = '\x00'
-
-  var indexes = [
-    { key: 'SRD', value: ['source', 'rel', 'dest', 'ts'] },
-    { key: 'DRS', value: ['dest', 'rel', 'source', 'ts'] },
-    { key: 'RDS', value: ['rel', 'dest', 'source', 'ts'] }
-  ]
 
   return {
     init: function (cb) {
@@ -67,6 +70,7 @@ module.exports = function (path, links, version, codec) {
               valueEncoding: 'json',
               type: 'put'
             }]
+
           function push(ary) {
             batch.push({key: codec.encode(ary), value: ' ', type: 'put'})
           }
@@ -90,13 +94,14 @@ module.exports = function (path, links, version, codec) {
     close: function (cb) {
       db.close(cb)
     },
+    //get the raw indexes, for debugging.
     dump: function () {
       return pl.read(db, {keyEncoding: codec, gt: '\x00'})
     },
+    //read all the messages out, via matching ranges.
     read: function (opts) {
       if(!opts) opts = {query: {}}
       if(!opts.query) opts.query = {}
-
       var index = select(indexes, opts.query)
       var opts = query(index, opts.query)
 
@@ -117,3 +122,6 @@ module.exports = function (path, links, version, codec) {
     }
   }
 }
+
+
+
