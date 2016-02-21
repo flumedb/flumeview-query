@@ -1,4 +1,5 @@
 var tape = require('tape')
+var select = require('../select')
 var query = require('../query')
 var u = require('../util')
 
@@ -8,10 +9,14 @@ var indexes = [
   {key: 'RDS', value: ['rel', 'source', 'dest']},
 ]
 
+function Q (q) {
+  return query(select(indexes, q), q)
+}
+
 tape('source and dest are exact', function (t) {
 
   t.deepEqual(
-    query(indexes, {source: 'foo', dest: 'bar'}),
+    Q({source: 'foo', dest: 'bar'}),
     {
       gte: ['SDR', 'foo', 'bar', u.LO],
       lt : ['SDR', 'foo', 'bar', u.HI]
