@@ -10,13 +10,20 @@ function all (stream, cb) {
   pull(stream, pull.collect(cb))
 }
 
+var indexes = [
+  { key: 'SRD', value: ['source', 'rel', 'dest', 'ts'] },
+  { key: 'DRS', value: ['dest', 'rel', 'source', 'ts'] },
+  { key: 'RDS', value: ['rel', 'dest', 'source', 'ts'] }
+]
+
+
 tape('simple', function (t) {
   var linksPath = path.join(osenv.tmpdir(), 'test_stream-view_links')
   rimraf.sync(linksPath)
 
   function extract (data, onLink) {
     for(var k in data.value)
-      onLink({source: data.key, dest: data.value[k], rel: k})
+      onLink({source: data.key, dest: data.value[k], rel: k, ts: data.ts})
   }
 
   var data = [
@@ -28,7 +35,7 @@ tape('simple', function (t) {
     {key: 'END', value: {error: 'END'}, ts: 4},
   ]
 
-  var links = Links(linksPath, extract, 1)
+  var links = Links(linksPath, indexes, extract, 1)
 
   t.test('init', function (t) {
     links.init(function (err, since) {
@@ -51,10 +58,11 @@ tape('simple', function (t) {
   t.test('query', function (t) {
     all(links.read(), function (err, ary) {
       if(err) throw err
-      t.equal(ary.length, 22)
-      all(links.read({
-        gte: ['DRS', 'START', 'read', ' '].join('!') + '!',
-        lt: ['DRS', 'START', 'read', '~'].join('!') + '~'
+      console.log(ary)
+//      t.equal(ary.length, 22)
+      all(links.dump({
+        gte: ['DRS', 'START', 'read', '!'],
+        lt: ['DRS', 'START', 'read', '~', undefined]
       }), function (err, ary) {
         console.log(ary)
         t.end()
@@ -65,7 +73,8 @@ tape('simple', function (t) {
   t.test('reinitialize', function (t) {
     links.close(function (err) {
       if(err) throw err
-      links = Links(linksPath, extract, 2)
+      console.log(indexes)
+      links = Links(linksPath, indexes, extract, 2)
       links.init(function (err, since) {
         t.notOk(since)
         pull(
@@ -85,7 +94,7 @@ tape('simple', function (t) {
   t.test('catchup', function (t) {
     links.close(function (err) {
       if(err) throw err
-      links = Links(linksPath, extract, 2)
+      links = Links(linksPath, indexes, extract, 2)
       links.init(function (err, since) {
         if(err) throw err
         t.equal(since, 4)
@@ -103,5 +112,6 @@ tape('simple', function (t) {
 
   })
 })
+
 
 
