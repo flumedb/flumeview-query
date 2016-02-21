@@ -1,0 +1,20 @@
+{
+  "name": "streamview-links",
+  "description": "",
+  "version": "0.0.0",
+  "homepage": "https://github.com/dominictarr/streamview-links",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/dominictarr/streamview-links.git"
+  },
+  "dependencies": {
+    "bytewise": "^1.1.0",
+    "ltgt": "^2.1.2"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "set -e; for t in test/*.js; do node $t; done"
+  },
+  "author": "Dominic Tarr <dominic.tarr@gmail.com> (http://dominictarr.com)",
+  "license": "MIT"
+}
