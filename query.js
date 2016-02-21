@@ -18,7 +18,7 @@ module.exports = function (index, query) {
     var a = [index.key]
     for(var i = 0; i < index.value.length; i++)
       a.push(map(query[index.value[i]]))
-    return encode(a)
+    return a
   }
 
   return {
