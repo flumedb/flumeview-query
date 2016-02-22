@@ -63,6 +63,7 @@ module.exports = function (path, indexes, links, version, codec) {
         Write(function (batch, cb) {
           db.batch(batch, cb)
         }, function (batch, data) {
+          if(data.sync) return batch
           if(!batch)
             batch = [{
               key: META,
@@ -86,7 +87,7 @@ module.exports = function (path, indexes, links, version, codec) {
               push(a)
             })
           })
-          batch[0].value.since = data.ts
+          batch[0].value.since = data.ts || data.timestamp
           return batch
         }, 100, cb)
       )
