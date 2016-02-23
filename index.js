@@ -7,7 +7,6 @@ var select = require('./select')
 
 var bytewise = require('bytewise')
 
-var u = require('./util')
 //sorted index.
 
 function has (key, obj) {
@@ -48,12 +47,15 @@ module.exports = function (path, indexes, links, version, codec) {
         //if the view has changed, rebuild entire index.
         //else, read current version.
 
-        else if(version && value.version !== version)
-          level.destroy(path, function (err) {
-            if(err) return cb(err)
-            db = level(path)
-            cb(null, 0)
+        else if(version && value.version !== version) {
+          db.close(function () {
+            level.destroy(path, function (err) {
+              if(err) return cb(err)
+              db = level(path)
+              cb(null, 0)
+            })
           })
+        }
         else
           cb(null, value.since || 0)
       })
@@ -123,6 +125,7 @@ module.exports = function (path, indexes, links, version, codec) {
     }
   }
 }
+
 
 
 
