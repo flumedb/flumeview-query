@@ -17,14 +17,14 @@ tape('source and dest are exact', function (t) {
 })
 
 tape('dest exact, rel is range', function (t) {
-  var query = select(indexes, {dest: 'bar', rel: {prefix: 'a'}})
+  var query = select(indexes, {dest: 'bar', rel: {$prefix: 'a'}})
 
   t.deepEqual(query, indexes[1])
   t.end()
 })
 
 tape('range only', function (t) {
-  t.deepEqual(select(indexes, {rel: {prefix:'b'}}), indexes[2])
+  t.deepEqual(select(indexes, {rel: {$prefix:'b'}}), indexes[2])
   t.end()
 })
 
@@ -34,12 +34,12 @@ tape('all exact', function (t) {
 })
 
 tape('all ranges', function (t) {
-  t.deepEqual(select(indexes, {source: {prefix:'f'}, dest: {prefix:'b'}}), indexes[0])
+  t.deepEqual(select(indexes, {source: {prefix:'f'}, dest: {$prefix:'b'}}), indexes[0])
   t.end()
 })
 
 tape('all ranges except rel', function (t) {
-  t.deepEqual(select(indexes, {source: {prefix:'f'}, dest: {prefix:'b'}, rel: 'x'}), indexes[2])
+  t.deepEqual(select(indexes, {source: {prefix:'f'}, dest: {$prefix:'b'}, rel: 'x'}), indexes[2])
   t.end()
 })
 
