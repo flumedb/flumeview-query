@@ -1,7 +1,7 @@
 var tape = require('tape')
 var select = require('../select')
 var query = require('../query')
-var u = require('../util')
+var Q = require('map-filter-reduce/util')
 
 var indexes = [
   {key: 'SDR', value: ['source', 'dest', 'rel']},
@@ -9,17 +9,17 @@ var indexes = [
   {key: 'RDS', value: ['rel', 'source', 'dest']},
 ]
 
-function Q (q) {
+function Query (q) {
   return query(select(indexes, q), q)
 }
 
 tape('source and dest are exact', function (t) {
 
   t.deepEqual(
-    Q({source: 'foo', dest: 'bar'}),
+    Query({source: 'foo', dest: 'bar'}),
     {
-      gte: ['SDR', 'foo', 'bar', u.LO],
-      lt : ['SDR', 'foo', 'bar', u.HI]
+      gte: ['SDR', 'foo', 'bar', Q.LO],
+      lt : ['SDR', 'foo', 'bar', Q.HI]
     }
   )
 
@@ -53,6 +53,8 @@ tape('source and dest are exact', function (t) {
 //  t.end()
 //})
 //
+
+
 
 
 
