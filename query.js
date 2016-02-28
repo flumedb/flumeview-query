@@ -1,5 +1,4 @@
-
-var u = require('./util')
+var Q = require('map-filter-reduce/util')
 var select = require('./select')
 
 function id (e) { return e }
@@ -9,7 +8,7 @@ module.exports = function (index, query) {
   function bound (value, range, sentinel) {
     return (
       value == null    ? sentinel
-    : u.isRange(value) ? range(value)
+    : Q.isRange(value) ? range(value)
     :                    value
     )
   }
@@ -23,10 +22,10 @@ module.exports = function (index, query) {
 
   return {
     gte: build(index, function (value) {
-      return bound(value, u.lower, u.LO)
+      return bound(value, Q.lower, Q.LO)
     }),
     lt: build(index, function (value) {
-      return bound(value, u.upper, u.HI)
+      return bound(value, Q.upper, Q.HI)
     })
     //reverse, limit, live?
   }
