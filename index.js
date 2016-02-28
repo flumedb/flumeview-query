@@ -4,8 +4,11 @@ var Write = require('pull-write')
 var pl = require('pull-level')
 var query = require('./query')
 var select = require('./select')
+var mfr = require('map-filter-reduce')
 
 var bytewise = require('bytewise')
+
+var isArray = Array.isArray
 
 //sorted index.
 
@@ -103,29 +106,38 @@ module.exports = function (path, indexes, links, version, codec) {
     },
     //read all the messages out, via matching ranges.
     read: function (opts) {
-      if(!opts) opts = {query: {}}
-      if(!opts.query) opts.query = {}
-      var index = select(indexes, opts.query)
-      var opts = query(index, opts.query)
+      opts = opts || {}
+      var _opts = {
+        live: opts.live, reverse: opts.reverse, limit: opts.limit
+      }
+      var q
 
-      opts.values = false
-      opts.keys = true
-      opts.keyEncoding = codec
+      if(isArray(opts.query))
+        q = opts.query[0].$filter || {}
+      else if(opts.query)
+        q = opts.query
+      else
+        q = {}
+
+      var index = select(indexes, q)
+      var _opts = query(index, q)
+
+      _opts.values = false
+      _opts.keys = true
+      _opts.keyEncoding = codec
 
       return pull(
-        pl.read(db, opts),
+        pl.read(db, _opts),
         //this just reads the index, suitable for links.
         pull.map(function (e) {
           var o = {}
           for(var i = 0; i < index.value.length; i++)
             o[index.value[i]] = e[i+1]
           return o
-        })
+        }),
+        isArray(opts.query) ? mfr(opts.query) : pull.through()
       )
     }
   }
 }
-
-
-
 
