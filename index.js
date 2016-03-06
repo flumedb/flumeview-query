@@ -5,8 +5,9 @@ var pl = require('pull-level')
 var query = require('./query')
 var select = require('./select')
 var mfr = require('map-filter-reduce')
-
+var keys = require('map-filter-reduce/keys')
 var bytewise = require('bytewise')
+var paramap = require('pull-paramap')
 
 var isArray = Array.isArray
 
@@ -40,6 +41,7 @@ module.exports = function (path, indexes, links, version, codec) {
   return {
     init: function (cb) {
       db.get(META, function (err, value) {
+        console.log('RELOAD INDEX:', value)
         if(value)
           try { value = JSON.parse(value) }
           catch (err) { return cb(null, 0) }
@@ -92,7 +94,8 @@ module.exports = function (path, indexes, links, version, codec) {
               push(a)
             })
           })
-          batch[0].value.since = data.ts || data.timestamp
+          var ts = data.ts || data.timestamp
+          if(ts) batch[0].value.since = ts
           return batch
         }, 100, cb)
       )
@@ -105,17 +108,20 @@ module.exports = function (path, indexes, links, version, codec) {
       return pl.read(db, {keyEncoding: codec, gt: '\x00'})
     },
     //read all the messages out, via matching ranges.
-    read: function (opts) {
+    read: function (opts, get) {
       opts = opts || {}
       var _opts = {
         live: opts.live, reverse: opts.reverse, limit: opts.limit
       }
-      var q
+      var q, k
 
-      if(isArray(opts.query))
+      if(isArray(opts.query)) {
         q = opts.query[0].$filter || {}
-      else if(opts.query)
+        k = keys(opts.query)
+      }
+      else if(opts.query) {
         q = opts.query
+      }
       else
         q = {}
 
@@ -126,6 +132,18 @@ module.exports = function (path, indexes, links, version, codec) {
       _opts.keys = true
       _opts.keyEncoding = codec
 
+      if(get && (k.value || k.key))
+        lookup = paramap(function (link, cb) {
+          get(link.ts, function (err, data) {
+            if(err) return cb(err)
+            link.key = data.key
+            link.value = data.value
+            cb(null, link)
+          })
+        })
+      else
+        lookup = pull.through()
+
       return pull(
         pl.read(db, _opts),
         //this just reads the index, suitable for links.
@@ -135,9 +153,15 @@ module.exports = function (path, indexes, links, version, codec) {
             o[index.value[i]] = e[i+1]
           return o
         }),
+        lookup,
         isArray(opts.query) ? mfr(opts.query) : pull.through()
       )
     }
   }
 }
+
+
+
+
+
 
