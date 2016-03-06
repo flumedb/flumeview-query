@@ -17,7 +17,9 @@
     "pull-stream": "^3.2.0",
     "pull-write": "^1.0.2"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "tape": "^4.5.0"
+  },
   "scripts": {
     "test": "set -e; for t in test/*.js; do node $t; done"
   },
