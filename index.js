@@ -140,17 +140,18 @@ module.exports = function (path, indexes, links, version, codec) {
 
       // just disable this for now.
 
-//      if(get && (k.value || k.key))
-//        lookup = paramap(function (link, cb) {
-//          get(link.ts, function (err, data) {
-//            if(err) return cb(err)
-//            link.key = data.key
-//            link.value = data.value
-//            cb(null, link)
-//          })
-//        })
+      if(get)
+        lookup = paramap(function (link, cb) {
+          get(link.ts || link.timestamp, function (err, data) {
+            if(err) return cb(err)
+            link.key = data.key
+            link.value = data.value
+            cb(null, link)
+          })
+        })
 //      else
 //        lookup = pull.through()
+
 
       return pull(
         pl.read(db, _opts),
@@ -161,9 +162,13 @@ module.exports = function (path, indexes, links, version, codec) {
             u.set(index.value[i], e[i+1], o)
           return o
         }),
+        lookup,
         isArray(opts.query) ? mfr(opts.query) : pull.through()
       )
     }
   }
 }
+
+
+
 
