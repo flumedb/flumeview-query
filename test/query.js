@@ -9,6 +9,12 @@ var indexes = [
   {key: 'RDS', value: ['rel', 'source', 'dest']},
 ]
 
+var indexes2 = [
+  { key: 'on', value: [['value', 'nest', 'okay'], ['value', 'nest', 'number']] },
+  { key: 'no', value: [['value', 'nest', 'number'], ['value', 'nest', 'okay']] }
+]
+
+
 function Query (q) {
   return query(select(indexes, q), q)
 }
@@ -19,7 +25,7 @@ tape('source and dest are exact', function (t) {
     Query({source: 'foo', dest: 'bar'}),
     {
       gte: ['SDR', 'foo', 'bar', Q.LO],
-      lt : ['SDR', 'foo', 'bar', Q.HI]
+      lte: ['SDR', 'foo', 'bar', Q.HI]
     }
   )
 
@@ -27,14 +33,14 @@ tape('source and dest are exact', function (t) {
 })
 
 tape('dest exact, rel is range', function (t) {
-  var query = select(indexes, {dest: 'bar', rel: {prefix: 'a'}})
+  var query = select(indexes, {dest: 'bar', rel: {$prefix: 'a'}})
 
   t.deepEqual(query, indexes[1])
   t.end()
 })
 
 tape('range only', function (t) {
-  t.deepEqual(select(indexes, {rel: {prefix:'b'}}), indexes[2])
+  t.deepEqual(select(indexes, {rel: {$prefix:'b'}}), indexes[2])
   t.end()
 })
 
@@ -44,18 +50,17 @@ tape('all exact', function (t) {
 })
 
 tape('all ranges', function (t) {
-  t.deepEqual(select(indexes, {source: {prefix:'f'}, dest: {prefix:'b'}}), indexes[0])
+  t.deepEqual(select(indexes, {source: {$prefix:'f'}, dest: {$prefix:'b'}}), indexes[0])
   t.end()
 })
 
 tape('all ranges except rel', function (t) {
-  t.deepEqual(select(indexes, {source: {prefix:'f'}, dest: {prefix:'b'}, rel: 'x'}), indexes[2])
+  t.deepEqual(select(indexes, {source: {$prefix:'f'}, dest: {$prefix:'b'}, rel: 'x'}), indexes[2])
   t.end()
 })
 
 
-
-
-
-
-
+tape('select best index on partial nested queries', function (t) {
+  t.deepEqual(select(indexes, {rel: {$prefix:'b'}}), indexes[2])
+  t.end()
+})

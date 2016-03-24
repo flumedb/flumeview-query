@@ -1,11 +1,15 @@
-
-
+var u = require('map-filter-reduce/util')
 var tape = require('tape')
 var select = require('../select')
 var indexes = [
   {key: 'SDR', value: ['source', 'dest', 'rel']},
   {key: 'DRS', value: ['dest', 'rel', 'source']},
   {key: 'RDS', value: ['rel', 'source', 'dest']},
+]
+
+var indexes2 = [
+  { key: 'on', value: [['value', 'nest', 'okay'], ['value', 'nest', 'number']] },
+  { key: 'no', value: [['value', 'nest', 'number'], ['value', 'nest', 'okay']] }
 ]
 
 tape('source and dest are exact', function (t) {
@@ -34,12 +38,18 @@ tape('all exact', function (t) {
 })
 
 tape('all ranges', function (t) {
-  t.deepEqual(select(indexes, {source: {prefix:'f'}, dest: {$prefix:'b'}}), indexes[0])
+  t.deepEqual(select(indexes, {source: {$prefix:'f'}, dest: {$prefix:'b'}}), indexes[0])
   t.end()
 })
 
-tape('all ranges except rel', function (t) {
-  t.deepEqual(select(indexes, {source: {prefix:'f'}, dest: {$prefix:'b'}, rel: 'x'}), indexes[2])
+tape('nested range', function (t) {
+  var query = {value: {nest: {number: {$gte: 0, $lte:3}}}}
+
+  t.deepEqual(
+    select(indexes2, query),
+    indexes2[1]
+  )
+
   t.end()
 })
 
