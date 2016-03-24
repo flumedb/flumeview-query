@@ -75,8 +75,3 @@ queries, performed on top of [secure-scuttlebutt](https://github.com/ssbc/secure
 
 MIT
 
-
-
-
-
-
