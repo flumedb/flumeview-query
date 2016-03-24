@@ -1,3 +1,4 @@
+'use strict'
 var level = require('level')
 var pull = require('pull-stream')
 var Write = require('pull-write')
@@ -8,15 +9,12 @@ var mfr = require('map-filter-reduce')
 var keys = require('map-filter-reduce/keys')
 var bytewise = require('bytewise')
 var paramap = require('pull-paramap')
+var u = require('./util')
 
 var isArray = Array.isArray
 
 //sorted index.
 
-function has (key, obj) {
-  return !!obj[key]
-  Object.hasOwnProperty(obj, key)
-}
 
 module.exports = function (path, indexes, links, version, codec) {
   codec = codec || require('bytewise')
@@ -26,10 +24,11 @@ module.exports = function (path, indexes, links, version, codec) {
     throw new Error('must provide path for leveldb instance')
   if(!Array.isArray(indexes))
     throw new Error('must provide an array of indexes')
-  if('function' !== typeof links)
-    throw new Error('must provide links function')
   if('number' !== typeof version)
     throw new Error('must provide version number')
+
+  if(!links)
+    links = function (data, emit) { emit(data) }
 
   //always write metada to the lowest key,
   //so the indexes do not interfeer
@@ -48,7 +47,6 @@ module.exports = function (path, indexes, links, version, codec) {
 
         if(err) //first time this was run
           cb(null, 0)
-          
         //if the view has changed, rebuild entire index.
         //else, read current version.
 
@@ -88,12 +86,13 @@ module.exports = function (path, indexes, links, version, codec) {
               var a = [index.key]
               for(var i = 0; i < index.value.length; i++) {
                 var key = index.value[i]
-                if(!has(key, link)) return
-                a.push(link[key])
+                if(!u.has(key, link)) return
+                a.push(u.get(key, link))
               }
               push(a)
             })
           })
+
           var ts = data.ts || data.timestamp
           if(ts) batch[0].value.since = ts
           return batch
@@ -109,6 +108,7 @@ module.exports = function (path, indexes, links, version, codec) {
     },
     //read all the messages out, via matching ranges.
     read: function (opts, get) {
+      var lookup
       opts = opts || {}
       var _opts = {
         live: opts.live, reverse: opts.reverse, limit: opts.limit
@@ -132,36 +132,38 @@ module.exports = function (path, indexes, links, version, codec) {
       _opts.keys = true
       _opts.keyEncoding = codec
 
-      if(get && (k.value || k.key))
-        lookup = paramap(function (link, cb) {
-          get(link.ts, function (err, data) {
-            if(err) return cb(err)
-            link.key = data.key
-            link.value = data.value
-            cb(null, link)
-          })
-        })
-      else
-        lookup = pull.through()
+      // If a query uses a key not in the index
+      // then we need to get that somehow.
+      // if this is a key from the thing indexed,
+      // it makes sense to look up that record.
+      // how to do that might be different in a view.
+
+      // just disable this for now.
+
+//      if(get && (k.value || k.key))
+//        lookup = paramap(function (link, cb) {
+//          get(link.ts, function (err, data) {
+//            if(err) return cb(err)
+//            link.key = data.key
+//            link.value = data.value
+//            cb(null, link)
+//          })
+//        })
+//      else
+//        lookup = pull.through()
 
       return pull(
         pl.read(db, _opts),
-        //this just reads the index, suitable for links.
+        //rehydrate the index to resemble the original object.
         pull.map(function (e) {
           var o = {}
           for(var i = 0; i < index.value.length; i++)
-            o[index.value[i]] = e[i+1]
+            u.set(index.value[i], e[i+1], o)
           return o
         }),
-        lookup,
         isArray(opts.query) ? mfr(opts.query) : pull.through()
       )
     }
   }
 }
-
-
-
-
-
 

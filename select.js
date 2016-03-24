@@ -6,7 +6,7 @@
 // starting from the left, then moving on to range fields.
 
 var Q = require('map-filter-reduce/util')
-
+var u = require('./util')
 function max(array, compare) {
   return array.reduce(function (max, e) {
     return compare(e.value, max.value) > 0 ? e : max
@@ -15,12 +15,21 @@ function max(array, compare) {
 
 module.exports = function select (indexes, query) {
 
-  var exact = {}, range = {}
+  function score (k) {
+    var v = u.get(k, query)
+    return u.has(k, query) ? (
+        Q.isExact(v) ? 3
+      : Q.isRange(v) ? 2
+      :                1
+    ) : 0
+  }
 
-  //TODO: check if a _path_ is exact, so we have deep queries.
-  for(var k in query) {
-    if(Q.isExact(query[k])) exact[k] = query[k]
-    else                    range[k] = query[k]
+  function exact (k) {
+    return u.has(k, query) && Q.isExact(u.get(k, query))
+  }
+
+  function range (k) {
+    return u.has(k, query) && Q.isRange(u.get(k, query))
   }
 
   function compare(a, b) {
@@ -28,10 +37,8 @@ module.exports = function select (indexes, query) {
     for(var i = 0; i < l; i++) {
       var k = a[i], j = b[i]
 
-      if     (exact[k]) { if(!exact[j]) return  1 }
-      else if(exact[j])                 return -1
-      else if(range[k]) { if(!range[j]) return  1 }
-      else if(range[j])                 return -1
+      var v = score(k), x = score(j)
+      if(v != x) return v - x
 
       // else, loop to next item.
     }
@@ -41,4 +48,10 @@ module.exports = function select (indexes, query) {
   return max(indexes, compare)
 
 }
+
+
+
+
+
+
 

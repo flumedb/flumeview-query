@@ -1,5 +1,6 @@
 var Q = require('map-filter-reduce/util')
 var select = require('./select')
+var get = require('./util').get
 
 function id (e) { return e }
 
@@ -16,7 +17,7 @@ module.exports = function (index, query) {
   function build (index, map) {
     var a = [index.key]
     for(var i = 0; i < index.value.length; i++)
-      a.push(map(query[index.value[i]]))
+      a.push(map(get(index.value[i], query)))
     return a
   }
 
@@ -24,7 +25,7 @@ module.exports = function (index, query) {
     gte: build(index, function (value) {
       return bound(value, Q.lower, Q.LO)
     }),
-    lt: build(index, function (value) {
+    lte: build(index, function (value) {
       return bound(value, Q.upper, Q.HI)
     })
     //reverse, limit, live?
