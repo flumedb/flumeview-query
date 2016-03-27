@@ -110,9 +110,7 @@ module.exports = function (path, indexes, links, version, codec) {
     read: function (opts, get) {
       var lookup
       opts = opts || {}
-      var _opts = {
-        live: opts.live, reverse: opts.reverse, limit: opts.limit
-      }
+      var _opts = {}
       var q, k
 
       if(isArray(opts.query)) {
@@ -131,6 +129,10 @@ module.exports = function (path, indexes, links, version, codec) {
       _opts.values = false
       _opts.keys = true
       _opts.keyEncoding = codec
+
+      _opts.reverse = opts.reverse
+      _opts.live = opts.live
+      _opts.limit = opts.limit
 
       // If a query uses a key not in the index
       // then we need to get that somehow.
@@ -168,6 +170,9 @@ module.exports = function (path, indexes, links, version, codec) {
     }
   }
 }
+
+
+
 
 
 
