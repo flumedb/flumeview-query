@@ -130,9 +130,9 @@ module.exports = function (path, indexes, links, version, codec) {
       _opts.keys = true
       _opts.keyEncoding = codec
 
-      _opts.reverse = opts.reverse
-      _opts.live = opts.live
-      _opts.limit = opts.limit
+      _opts.reverse = !!opts.reverse
+      _opts.live = !!opts.live
+      _opts.limit = opts.limit || -1
 
       // If a query uses a key not in the index
       // then we need to get that somehow.
@@ -152,8 +152,7 @@ module.exports = function (path, indexes, links, version, codec) {
           })
         })
 //      else
-//        lookup = pull.through()
-
+  //      lookup = pull.through()
 
       return pull(
         pl.read(db, _opts),
@@ -170,10 +169,4 @@ module.exports = function (path, indexes, links, version, codec) {
     }
   }
 }
-
-
-
-
-
-
 
