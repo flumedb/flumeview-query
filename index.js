@@ -9,6 +9,7 @@ var mfr = require('map-filter-reduce')
 var keys = require('map-filter-reduce/keys')
 var bytewise = require('bytewise')
 var paramap = require('pull-paramap')
+var explain = require('explain-error')
 var u = require('./util')
 
 var isArray = Array.isArray
@@ -126,6 +127,8 @@ module.exports = function (path, indexes, links, version, codec) {
       var index = select(indexes, q)
       var _opts = query(index, q)
 
+    console.log(_opts)
+
       _opts.values = false
       _opts.keys = true
       _opts.keyEncoding = codec
@@ -145,14 +148,12 @@ module.exports = function (path, indexes, links, version, codec) {
       if(get)
         lookup = paramap(function (link, cb) {
           get(link.ts || link.timestamp, function (err, data) {
-            if(err) return cb(err)
+            if(err) return cb(explain(err, 'could not find matching timestamp for index:'+JSON.stringify(link)))
             link.key = data.key
             link.value = data.value
             cb(null, link)
           })
         })
-//      else
-  //      lookup = pull.through()
 
       return pull(
         pl.read(db, _opts),
@@ -169,4 +170,7 @@ module.exports = function (path, indexes, links, version, codec) {
     }
   }
 }
+
+
+
 
