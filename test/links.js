@@ -45,6 +45,16 @@ tape('simple', function (t) {
     })
   })
 
+  var live = []
+
+  pull(
+    links.read({query: [{$filter: {rel: {$prefix: 'e'}}}], live: true}),
+    pull.drain(function (e) {
+      console.log('LIVE', e)
+      live.push(e)
+    })
+  )
+
   t.test('load', function (t) {
     pull(
       pull.values(data),
@@ -111,7 +121,24 @@ tape('simple', function (t) {
     })
 
   })
+
+  t.test('live', function (t) {
+    t.deepEqual(live, [{
+      dest: 'ERROR', rel: 'error', source: 'START', ts: 1
+    }, {
+      dest: 'END', rel: 'end', source: 'START', ts: 1
+    }, {
+      dest: 'ERROR', rel: 'error', source: 'READY', ts: 2
+    }, {
+      dest: 'END', rel: 'end', source: 'READY', ts: 2
+    }, {
+      dest: 'END', rel: 'error', source: 'END', ts: 4
+    }])
+
+    t.end()
+  })
 })
+
 
 
 
