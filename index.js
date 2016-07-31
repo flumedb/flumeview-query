@@ -17,7 +17,7 @@ var isArray = Array.isArray
 //sorted index.
 
 
-module.exports = function (path, indexes, links, version, codec) {
+module.exports = function (path, indexes, links, version, codec, createLogStream) {
   codec = codec || require('bytewise')
   var db = level(path)
 
@@ -30,6 +30,7 @@ module.exports = function (path, indexes, links, version, codec) {
 
   if(!links)
     links = function (data, emit) { emit(data) }
+
 
   //always write metada to the lowest key,
   //so the indexes do not interfeer
@@ -79,7 +80,7 @@ module.exports = function (path, indexes, links, version, codec) {
             }]
 
           function push(ary) {
-            batch.push({key: codec.encode(ary), value: ' ', type: 'put'})
+            batch.push({key: ary, keyEncoding: codec, value: ' ', type: 'put'})
           }
 
           links(data, function (link) {
@@ -116,7 +117,7 @@ module.exports = function (path, indexes, links, version, codec) {
 
       if(isArray(opts.query)) {
         q = opts.query[0].$filter || {}
-        k = keys(opts.query)
+//        k = keys(opts.query)
       }
       else if(opts.query) {
         q = opts.query
@@ -125,16 +126,27 @@ module.exports = function (path, indexes, links, version, codec) {
         q = {}
 
       var index = select(indexes, q)
-      var _opts = query(index, q)
 
-    console.log(_opts)
+      //just a hack. consider this disabled...
+      if(index.key === 'log') {
+        //TODO: handle log properly.
+        //insert log
+        return pull(
+          createLogStream(opts),
+          isArray(opts.query) ? mfr(opts.query) : pull.through()
+        )
+      }
+
+
+      var _opts = query(index, q)
 
       _opts.values = false
       _opts.keys = true
       _opts.keyEncoding = codec
 
       _opts.reverse = !!opts.reverse
-      _opts.live = !!opts.live
+      _opts.live = opts.live
+      _opts.old = opts.old
       _opts.limit = opts.limit || -1
 
       // If a query uses a key not in the index
@@ -159,6 +171,7 @@ module.exports = function (path, indexes, links, version, codec) {
         pl.read(db, _opts),
         //rehydrate the index to resemble the original object.
         pull.map(function (e) {
+          if(e.sync) return e
           var o = {}
           for(var i = 0; i < index.value.length; i++)
             u.set(index.value[i], e[i+1], o)
@@ -170,7 +183,4 @@ module.exports = function (path, indexes, links, version, codec) {
     }
   }
 }
-
-
-
 
