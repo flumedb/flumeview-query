@@ -12,7 +12,7 @@
     "explain-error": "^1.0.1",
     "level": "^1.4.0",
     "ltgt": "^2.1.2",
-    "map-filter-reduce": "^3.0.1",
+    "map-filter-reduce": "^3.0.2",
     "pull-level": "^2.0.2",
     "pull-live": "^1.0.1",
     "pull-paramap": "^1.1.3",
