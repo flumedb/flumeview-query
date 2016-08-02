@@ -147,7 +147,7 @@ module.exports = function (path, indexes, links, version, codec, createLogStream
       _opts.reverse = !!opts.reverse
       _opts.live = opts.live
       _opts.old = opts.old
-      _opts.limit = opts.limit || -1
+//      _opts.limit = opts.limit || -1
 
       // If a query uses a key not in the index
       // then we need to get that somehow.
@@ -159,6 +159,7 @@ module.exports = function (path, indexes, links, version, codec, createLogStream
 
       if(get)
         lookup = paramap(function (link, cb) {
+          if(link.sync) return cb(null, link)
           get(link.ts || link.timestamp, function (err, data) {
             if(err) return cb(explain(err, 'could not find matching timestamp for index:'+JSON.stringify(link)))
             link.key = data.key
@@ -178,9 +179,11 @@ module.exports = function (path, indexes, links, version, codec, createLogStream
           return o
         }),
         lookup,
-        isArray(opts.query) ? mfr(opts.query) : pull.through()
+        isArray(opts.query) ? mfr(opts.query) : pull.through(),
+        opts.limit > 0 ? pull.take(opts.limit) : pull.through()
       )
     }
   }
 }
+
 
