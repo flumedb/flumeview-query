@@ -42,7 +42,6 @@ module.exports = function (path, indexes, links, version, codec, createLogStream
   return {
     init: function (cb) {
       db.get(META, function (err, value) {
-        console.log('RELOAD INDEX:', value)
         if(value)
           try { value = JSON.parse(value) }
           catch (err) { return cb(null, 0) }
@@ -147,6 +146,7 @@ module.exports = function (path, indexes, links, version, codec, createLogStream
       _opts.reverse = !!opts.reverse
       _opts.live = opts.live
       _opts.old = opts.old
+      _opts.sync = opts.sync
 //      _opts.limit = opts.limit || -1
 
       // If a query uses a key not in the index
@@ -185,5 +185,4 @@ module.exports = function (path, indexes, links, version, codec, createLogStream
     }
   }
 }
-
 
