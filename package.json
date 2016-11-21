@@ -1,26 +1,25 @@
 {
-  "name": "streamview-links",
-  "description": "",
+  "name": "flumeview-query",
+  "description": "map-filter-reduce queries for flumedb",
   "version": "2.1.1",
-  "homepage": "https://github.com/dominictarr/streamview-links",
+  "homepage": "https://github.com/flumedb/flumeview-query",
   "repository": {
     "type": "git",
-    "url": "git://github.com/dominictarr/streamview-links.git"
+    "url": "git://github.com/flumedb/flumeview-query.git"
   },
   "dependencies": {
-    "bytewise": "^1.1.0",
     "explain-error": "^1.0.1",
-    "level": "^1.4.0",
-    "ltgt": "^2.1.2",
+    "flumeview-level": "^1.0.3",
     "map-filter-reduce": "^3.0.2",
-    "pull-level": "^2.0.2",
-    "pull-live": "^1.0.1",
     "pull-paramap": "^1.1.3",
     "pull-sink-through": "0.0.0",
-    "pull-stream": "^3.4.0",
-    "pull-write": "^1.0.2"
+    "pull-stream": "^3.4.0"
   },
   "devDependencies": {
+    "flumedb": "^0.1.0",
+    "flumelog-offset": "0.0.3",
+    "level-codec": "^6.2.0",
+    "osenv": "^0.1.3",
     "tape": "^4.5.0"
   },
   "scripts": {
