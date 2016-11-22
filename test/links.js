@@ -5,7 +5,7 @@ var path = require('path')
 var pull = require('pull-stream')
 var Flume = require('flumedb')
 var FlumeLog = require('flumelog-offset')
-var Links = require('../')
+var Links = require('../links')
 var rimraf = require('rimraf')
 
 var codec = require('level-codec/lib/encodings')
@@ -20,11 +20,25 @@ var indexes = [
   { key: 'RDS', value: ['rel', 'dest', 'source'] }
 ]
 
+var data = [
+  {key: 'START', value: {read: 'READY', error: 'ERROR', end: 'END'}},
+  {key: 'READY', value: {
+    read: 'START', error: "ERROR", end: "END"}
+  },
+  {key: 'ERROR', value: {}},
+  {key: 'END', value: {error: 'END'}},
+]
+
+var raw = []
 
 function extract (data, onLink) {
   for(var k in data.value)
-    onLink({source: data.key, dest: data.value[k], rel: k, ts: data.ts})
+    onLink({source: data.key, dest: data.value[k], rel: k})
 }
+
+data.forEach(function (e) {
+  extract(e, function (v) { raw.push(v) })
+})
 
 tape('simple', function (t) {
   var linksPath = path.join(osenv.tmpdir(), 'test_stream-view_links')
@@ -32,15 +46,6 @@ tape('simple', function (t) {
 
   var db = Flume(FlumeLog(path.join(linksPath, 'log.offset'), 1024, codec.json))
             .use('links', Links(indexes, extract))
-
-  var data = [
-    {key: 'START', value: {read: 'READY', error: 'ERROR', end: 'END'}},
-    {key: 'READY', value: {
-      read: 'START', error: "ERROR", end: "END"}
-    },
-    {key: 'ERROR', value: {}},
-    {key: 'END', value: {error: 'END'}},
-  ]
 
   var links = db.links
 
@@ -89,21 +94,25 @@ tape('simple', function (t) {
   })
 
   t.test('live', function (t) {
-    t.deepEqual(live, [{
-      dest: 'ERROR', rel: 'error', source: 'START'
-    }, {
-      dest: 'END', rel: 'end', source: 'START'
-    }, {
-      dest: 'ERROR', rel: 'error', source: 'READY'
-    }, {
-      dest: 'END', rel: 'end', source: 'READY'
-    }, {
-      dest: 'END', rel: 'error', source: 'END'
-    }])
+    t.deepEqual(live, raw.filter(function (e) { return e.rel[0] == 'e' }))
+//[{
+//      dest: 'ERROR', rel: 'error', source: 'START'
+//    }, {
+//      dest: 'END', rel: 'end', source: 'START'
+//    }, {
+//      dest: 'ERROR', rel: 'error', source: 'READY'
+//    }, {
+//      dest: 'END', rel: 'end', source: 'READY'
+//    }, {
+//      dest: 'END', rel: 'error', source: 'END'
+//    }])
 
     t.end()
   })
 })
+
+
+
 
 
 
