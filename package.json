@@ -1,7 +1,7 @@
 {
   "name": "flumeview-query",
   "description": "map-filter-reduce queries for flumedb",
-  "version": "2.1.1",
+  "version": "3.0.0",
   "homepage": "https://github.com/flumedb/flumeview-query",
   "repository": {
     "type": "git",
