@@ -13,6 +13,17 @@ function max(array, compare) {
   }, array[0])
 }
 
+function _max (ary, score) {
+  var j = -1, M = 0
+  for(var i = 0; i < ary.length; i++) {
+    var m = score(ary[i])
+    if(m > M) {
+      M = m; j = i
+    }
+  }
+  return ary[j]
+}
+
 module.exports = function select (indexes, query) {
 
   function score (k) {
@@ -32,22 +43,16 @@ module.exports = function select (indexes, query) {
     return u.has(k, query) && Q.isRange(u.get(k, query))
   }
 
-  function compare(a, b) {
-    var l = Math.min(a.length, b.length)
-    for(var i = 0; i < l; i++) {
-      var k = a[i], j = b[i]
-
-      var v = score(k), x = score(j)
-      if(v != x) return v - x
-
-      // else, loop to next item.
+  return _max(indexes, function (index) {
+    var s = 0
+    for(var i = 0; i < index.value.length; i++) {
+      s = s*s + score(index.value[i])
     }
-    return 0
-  }
-
-  return max(indexes, compare)
-
+    return s
+  })
 }
+
+
 
 
 
