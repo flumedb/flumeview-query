@@ -69,7 +69,11 @@ module.exports = function (indexes, version) {
       _opts.limit = opts.limit
 
       return pull(
-        read(_opts), pull.map('value'),
+        read(_opts),
+        pull.map(function (data) {
+          if(data.sync) return data
+          else return data.value
+        }),
         isArray(opts.query) ? mfr(opts.query) : pull.through()
       )
 
@@ -78,5 +82,6 @@ module.exports = function (indexes, version) {
     return index
   }
 }
+
 
 
