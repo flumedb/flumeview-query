@@ -24,8 +24,8 @@ tape('source and dest are exact', function (t) {
   t.deepEqual(
     Query({source: 'foo', dest: 'bar'}),
     {
-      gte: ['SDR', 'foo', 'bar', Q.LO],
-      lte: ['SDR', 'foo', 'bar', Q.HI]
+      gte: ['SDR', 'foo', 'bar', Q.LO, Q.LO],
+      lte: ['SDR', 'foo', 'bar', Q.HI, Q.HI]
     }
   )
 
