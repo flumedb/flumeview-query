@@ -66,6 +66,7 @@ module.exports = function (indexes, version) {
       _opts.live = opts.live
       _opts.old = opts.old
       _opts.sync = opts.sync
+      _opts.limit = opts.limit
 
       return pull(
         read(_opts), pull.map('value'),
@@ -77,4 +78,5 @@ module.exports = function (indexes, version) {
     return index
   }
 }
+
 
