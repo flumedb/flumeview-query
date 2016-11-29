@@ -51,11 +51,11 @@ module.exports = function (indexes, version) {
         q = {}
 
       var index = select(indexes, q)
-
+      var filter = isArray(opts.query) ? mfr(opts.query) : pull.through()
       if(!index)
-        return log.stream({
+        return pull(log.stream({
           values: true, seqs: false, live: opts.live, limit: opts.limit, reverse: opts.reverse
-        })
+        }), filter)
 
       var _opts = query(index, q)
 
@@ -74,7 +74,7 @@ module.exports = function (indexes, version) {
           if(data.sync) return data
           else return data.value
         }),
-        isArray(opts.query) ? mfr(opts.query) : pull.through()
+        filter
       )
 
     }
@@ -82,6 +82,10 @@ module.exports = function (indexes, version) {
     return index
   }
 }
+
+
+
+
 
 
 
