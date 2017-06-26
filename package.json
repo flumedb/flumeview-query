@@ -18,9 +18,11 @@
   },
   "devDependencies": {
     "flumedb": "^0.1.0",
+    "flumelog-memory": "^0.1.3",
     "flumelog-offset": "0.0.3",
     "level-codec": "^6.2.0",
     "osenv": "^0.1.3",
+    "rimraf": "^2.6.1",
     "tape": "^4.5.0"
   },
   "scripts": {

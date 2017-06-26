@@ -11,24 +11,46 @@ var FlumeViewLevel = require('flumeview-level')
 
 var isArray = Array.isArray
 
+function fullScan(log, opts) {
+  return log.stream({
+      values: true, seqs: false, live: opts.live, limit: opts.limit, reverse: opts.reverse
+    })
+}
+
 //sorted index.
 
 //split this into TWO modules. flumeview-links and flumeview-query
 module.exports = function (indexes, version) {
 
-  var create = FlumeViewLevel(version || 1, function (data, seq) {
-    var A = []
-    indexes.forEach(function (index) {
-      var a = [index.key]
-      for(var i = 0; i < index.value.length; i++) {
-        var key = index.value[i]
-        if(!u.has(key, data)) return []
-        a.push(u.get(key, data))
+  function create(log, name) {
+
+    if (!indexes.length) {
+      return {
+        since: log.since,
+        get: log.get,
+        methods: { get: 'async', read: 'source'},
+        read: function (opts) {
+          var filter = isArray(opts.query) ? mfr(opts.query) : pull.through()
+          return pull(fullScan(log, opts), filter)
+        },
+        createSink: function (cb) {return pull.onEnd(cb) }
       }
-      a.push(seq); A.push(a)
-    })
-    return A
-  })
+    }
+ 
+    return FlumeViewLevel(version || 1, function (data, seq) {
+      var A = []
+      indexes.forEach(function (index) {
+        var a = [index.key]
+        for(var i = 0; i < index.value.length; i++) {
+          var key = index.value[i]
+          if(!u.has(key, data)) return []
+          a.push(u.get(key, data))
+        }
+        a.push(seq); A.push(a)
+      })
+      return A
+    })(log, name)
+  }
 
   return function (log, name) {
 
@@ -52,10 +74,9 @@ module.exports = function (indexes, version) {
 
       var index = select(indexes, q)
       var filter = isArray(opts.query) ? mfr(opts.query) : pull.through()
+
       if(!index)
-        return pull(log.stream({
-          values: true, seqs: false, live: opts.live, limit: opts.limit, reverse: opts.reverse
-        }), filter)
+        return pull(fullScan(log, opts),  filter)
 
       var _opts = query(index, q)
 
@@ -82,10 +103,3 @@ module.exports = function (indexes, version) {
     return index
   }
 }
-
-
-
-
-
-
-
