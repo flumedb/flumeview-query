@@ -9,7 +9,7 @@
   },
   "dependencies": {
     "explain-error": "^1.0.1",
-    "flumeview-level": "^1.0.3",
+    "flumeview-level": "^2.0.5",
     "map-filter-reduce": "^3.0.2",
     "pull-flatmap": "0.0.1",
     "pull-paramap": "^1.1.3",
