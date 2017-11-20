@@ -64,7 +64,7 @@ tape('select best index on partial nested queries', function (t) {
   t.deepEqual(select(indexes, {rel: {$prefix:'b'}}), indexes[2])
   t.end()
 })
-return
+
 tape('query works on {$prefix} inside an array', function (t) {
 
     console.log(Q.upper(['hello', {$prefix: "ok"}]))
@@ -74,13 +74,14 @@ tape('query works on {$prefix} inside an array', function (t) {
       rel: ['mentions', {$prefix: "@"}]
     }),
     {"gte":
-        ["RDS",["mentions","@"],null,null],
+        ["RDS",["mentions","@"],null, null, null],
       "lte":
-        ["RDS",["mentions","@\uffff"],undefined, undefined]
+        ["RDS",["mentions","@\uffff"],undefined, undefined, undefined]
     }
   )
 
 //  console.log(JSON.stringify(v))
   t.end()
 })
+
 

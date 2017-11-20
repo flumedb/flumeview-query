@@ -29,9 +29,13 @@ tape('simple', function (t) {
   rimraf.sync(linksPath)
 
   var db = Flume(FlumeLog(path.join(linksPath, 'log.offset'), 1024, codec.json))
-            .use('links', Query(indexes))
+            .use('links', Query(1, indexes))
 
   var links = db.links
+  var live = []
+  pull(links.read({
+    query: [{$filter: {value: {nest: {number: {$gt: 0}}} }}], live: true, sync: false
+  }), pull.drain(live.push.bind(live)))
 
   t.test('init', function (t) {
     links.since.once(function (v) {
@@ -78,6 +82,11 @@ tape('simple', function (t) {
       t.deepEqual(ary, [data[0]])
       t.end()
     })
+  })
+
+  t.test('live', function (t) {
+    t.deepEqual(live, data)
+    t.end()
   })
 
 })
