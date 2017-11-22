@@ -1,7 +1,7 @@
 {
   "name": "flumeview-query",
   "description": "map-filter-reduce queries for flumedb",
-  "version": "4.0.0",
+  "version": "4.0.1",
   "homepage": "https://github.com/flumedb/flumeview-query",
   "repository": {
     "type": "git",
@@ -30,5 +30,3 @@
   "author": "Dominic Tarr <dominic.tarr@gmail.com> (http://dominictarr.com)",
   "license": "MIT"
 }
-
-
