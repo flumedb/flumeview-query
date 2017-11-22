@@ -20,7 +20,6 @@ module.exports = function (indexes, version, filter) {
     indexes = version
     version = _i
   }
-  console.log('i,v', indexes, version)
   filter = filter || function () { return true }
 
   var create = FlumeViewLevel(version || 1, function (data, seq) {
@@ -91,6 +90,7 @@ module.exports = function (indexes, version, filter) {
     return index
   }
 }
+
 
 
 
