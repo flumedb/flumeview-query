@@ -14,10 +14,13 @@ var isArray = Array.isArray
 //sorted index.
 
 //split this into TWO modules. flumeview-links and flumeview-query
-module.exports = function (version, indexes, filter, transform) {
+module.exports = function (indexes, version, filter) {
+  if('number' == typeof indexes) {
+    var _i = indexes
+    indexes = version
+    version = _i
+  }
   filter = filter || function () { return true }
-  if('number' === typeof transform)
-    version = transform, null
 
   var create = FlumeViewLevel(version || 1, function (data, seq) {
     if(!filter(data)) return []
@@ -32,7 +35,7 @@ module.exports = function (version, indexes, filter, transform) {
       a.push(seq); A.push(a)
     })
     return A
-  }, transform)
+  })
 
   return function (log, name) {
 
@@ -87,10 +90,6 @@ module.exports = function (version, indexes, filter, transform) {
     return index
   }
 }
-
-
-
-
 
 
 
