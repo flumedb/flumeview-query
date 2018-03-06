@@ -75,26 +75,21 @@ tape('simple', function (t) {
       ary.forEach(function (e, i) {
         t.equal(e.count, i+ 10)
       })
-      t.end()
+
+      all(seek(10, 20), function (err, ary) {
+        if(err) throw err
+        console.log(ary)
+        t.equal(ary.length, 10, 'LIMIT')
+        ary.forEach(function (e, i) {
+          t.equal(e.count, i+ 20)
+        })
+        t.end()
+      })
     })
   })
 
-//  t.test('query', function (t) {
-//    all(links.read({query: {dest: 'ERROR'}}), function (err, ary) {
-//      if(err) throw err
-//      console.log(ary)
-//      t.end()
-//    })
-//
-//  })
-//
-//  t.test('live', function (t) {
-//    t.deepEqual(live, raw.filter(function (e) { return e.rel[0] == 'e' }))
-//
-//    t.end()
-//  })
-//
 })
+
 
 
 
