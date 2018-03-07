@@ -10,17 +10,20 @@ var u = require('./util')
 var FlumeViewLevel = require('flumeview-level')
 
 var isArray = Array.isArray
+var isNumber = function (n) { return 'number' === typeof n }
+var isObject = function (o) { return o && 'object' === typeof o && !isArray(o) }
+
 
 //sorted index.
 
 //split this into TWO modules. flumeview-links and flumeview-query
-module.exports = function (indexes, version, filter) {
-  if('number' == typeof indexes) {
-    var _i = indexes
-    indexes = version
-    version = _i
-  }
-  filter = filter || function () { return true }
+module.exports = function (version, opts) {
+  if(!isNumber(version)) throw new Error('flumeview-query:version expected as first arg')
+  if(!isObject(opts)) throw new Error('flumeview-query: expected opts as second arg')
+  var indexes = opts.indexes
+  var filter = opts.filter || function () { return true }
+  var map = opts.map
+  var exact = opts.exact !== false
 
   var create = FlumeViewLevel(version || 1, function (data, seq) {
     if(!filter(data)) return []
@@ -32,7 +35,8 @@ module.exports = function (indexes, version, filter) {
         if(!u.has(key, data)) return []
         a.push(u.get(key, data))
       }
-      a.push(seq); A.push(a)
+      if(!exact) a.push(seq);
+      A.push(a)
     })
     return A
   })
@@ -59,12 +63,17 @@ module.exports = function (indexes, version, filter) {
 
       var index = select(indexes, q)
       var filter = isArray(opts.query) ? mfr(opts.query) : pull.through()
-      if(!index)
-        return pull(log.stream({
-          values: true, seqs: false, live: opts.live, limit: opts.limit, reverse: opts.reverse
-        }), filter)
+      if(!index) {
+        return pull(
+          log.stream({
+            values: true, seqs: false, live: opts.live, reverse: opts.reverse
+          }),
+          filter,
+          opts.limit ? pull.take(opts.limit) : undefined
+        )
+      }
 
-      var _opts = query(index, q)
+      var _opts = query(index, q, exact)
 
       _opts.values = true
       _opts.keys = true
@@ -73,7 +82,6 @@ module.exports = function (indexes, version, filter) {
       _opts.live = opts.live
       _opts.old = opts.old
       _opts.sync = opts.sync
-      _opts.limit = opts.limit
 
       return pull(
         read(_opts),
@@ -82,7 +90,8 @@ module.exports = function (indexes, version, filter) {
           else return data.value
         }),
         pull.filter(),
-        filter
+        filter,
+        opts.limit && pull.take(opts.limit)
       )
 
     }
@@ -90,6 +99,7 @@ module.exports = function (indexes, version, filter) {
     return index
   }
 }
+
 
 
 

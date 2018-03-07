@@ -4,7 +4,7 @@ var get = require('./util').get
 
 function id (e) { return e }
 
-module.exports = function (index, query) {
+module.exports = function (index, query, exact) {
 
   function bound (value, range, sentinel) {
     return (
@@ -18,7 +18,7 @@ module.exports = function (index, query) {
     var a = [index.key]
     for(var i = 0; i < index.value.length; i++)
       a.push(map(get(index.value[i], query)))
-    a.push(b)
+    if(!exact) a.push(b)
     return a
   }
 
@@ -33,6 +33,5 @@ module.exports = function (index, query) {
   }
 
 }
-
 
 
