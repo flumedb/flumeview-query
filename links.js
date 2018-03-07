@@ -79,8 +79,7 @@ module.exports = function (indexes, links, version) {
         )
       var _opts = query(index, q)
 
-
-      _opts.values = false
+      _opts.values = true
       _opts.keys = true
 
       _opts.reverse = !!opts.reverse
@@ -97,10 +96,12 @@ module.exports = function (indexes, links, version) {
             u.set(index.value[i], data.key[i+1], o)
           return o
         }),
-        isArray(opts.query) ? mfr(opts.query) : pull.through()
+        isArray(opts.query) ? mfr(opts.query) : pull.through(),
+        opts.limit ? pull.take(opts.limit) : pull.through(),
       )
     }
     return index
   }
 }
+
 
