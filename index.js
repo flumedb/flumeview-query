@@ -83,6 +83,8 @@ module.exports = function (version, opts) {
       _opts.old = opts.old
       _opts.sync = opts.sync
 
+      console.log('stream', _opts)
+
       return pull(
         read(_opts),
         pull.map(function (data) {
@@ -90,18 +92,11 @@ module.exports = function (version, opts) {
           else return data.value
         }),
         pull.filter(),
-        filter,
+        opts.filter !== false && filter,
         opts.limit && pull.take(opts.limit)
       )
-
     }
-
     return index
   }
 }
-
-
-
-
-
 
