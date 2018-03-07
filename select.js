@@ -44,16 +44,15 @@ module.exports = function select (indexes, query) {
   }
 
   return _max(indexes, function (index) {
-    var s = 0
+    var s = 0, _s
     for(var i = 0; i < index.value.length; i++) {
-      s = s*s + score(index.value[i])
+      _s = score(index.value[i])
+      if(!_s) return s //stop counting when one thing doesn't match
+      s = s*s + _s
     }
     return s
   })
 }
-
-
-
 
 
 
