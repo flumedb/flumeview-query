@@ -43,10 +43,10 @@ module.exports = function (version, opts) {
 
   return function (log, name) {
 
-    var index = create(log, name)
-    var read = index.read
+    var view = create(log, name)
+    var read = view.read
 
-    index.read = function (opts) {
+    view.read = function (opts) {
 
       opts = opts || {}
       var _opts = {}
@@ -83,8 +83,6 @@ module.exports = function (version, opts) {
       _opts.old = opts.old
       _opts.sync = opts.sync
 
-      console.log('stream', _opts)
-
       return pull(
         read(_opts),
         pull.map(function (data) {
@@ -96,7 +94,9 @@ module.exports = function (version, opts) {
         opts.limit && pull.take(opts.limit)
       )
     }
-    return index
+    return view
   }
 }
+
+
 
