@@ -45,8 +45,8 @@ module.exports = function (version, opts) {
 
     var view = create(log, name)
     var read = view.read
-
-    view.read = function (opts) {
+    view.methods.explain = 'sync'
+    view.explain = function (opts) {
 
       opts = opts || {}
       var _opts = {}
@@ -62,41 +62,38 @@ module.exports = function (version, opts) {
         q = {}
 
       var index = select(indexes, q)
-      var filter = isArray(opts.query) ? mfr(opts.query) : pull.through()
-      if(!index) {
-        return pull(
-          log.stream({
-            values: true, seqs: false, live: opts.live, reverse: opts.reverse
-          }),
-          filter,
-          opts.limit ? pull.take(opts.limit) : undefined
-        )
-      }
-
+      if(!index) return {scan: true}
       var _opts = query(index, q, exact)
-
       _opts.values = true
       _opts.keys = true
-
       _opts.reverse = !!opts.reverse
       _opts.live = opts.live
       _opts.old = opts.old
       _opts.sync = opts.sync
+      _opts.limit = opts.limit
+      return _opts
+    }
 
+    view.read = function (opts) {
+      var _opts = view.explain(opts = opts || {})
       return pull(
-        read(_opts),
-        pull.map(function (data) {
-          if(data.sync) return data
-          else return data.value
-        }),
-        pull.filter(),
-        opts.filter !== false && filter,
+        (_opts.scan
+        ? log.stream({
+            values: true, seqs: false,
+            live: opts.live, reverse: opts.reverse
+          })
+        : pull(
+            read(_opts),
+            pull.map(function (data) {
+              return data.sync ? data : data.value
+            })
+          )
+        ),
+        opts.filter !== false && isArray(opts.query) && mfr(opts.query),
         opts.limit && pull.take(opts.limit)
       )
     }
     return view
   }
 }
-
-
 
