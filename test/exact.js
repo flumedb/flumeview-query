@@ -7,7 +7,7 @@ var Flume = require('flumedb')
 var FlumeLog = require('flumelog-offset')
 var Query = require('../')
 var rimraf = require('rimraf')
-
+var timestamp = require('monotonic-timestamp')
 var codec = require('level-codec/lib/encodings')
 
 function all (stream, cb) {
@@ -15,7 +15,7 @@ function all (stream, cb) {
 }
 
 var indexes = [
-  { key: 'S', value: ['okay'] },
+  { key: 'S', value: ['okay', 'timestamp'] },
 ]
 
 var raw = []
@@ -26,7 +26,7 @@ tape('simple', function (t) {
   rimraf.sync(seekPath)
 
   var db = Flume(FlumeLog(path.join(seekPath, 'log.offset'), 1024, codec.json))
-            .use('query', Query(1, {indexes: indexes, exact: false}))
+            .use('query', Query(1, {indexes:indexes}))
 
   var query = db.query
 
@@ -51,7 +51,7 @@ tape('simple', function (t) {
   var data = []
   for(var i = 0;i < 100;i ++)
     data.push({
-      count: i, random: Math.random(), timestamp: Date.now(), okay: true
+      count: i, random: Math.random(), timestamp: timestamp(), okay: true
     })
 
   t.test('load', function (t) {

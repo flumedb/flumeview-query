@@ -29,7 +29,7 @@ tape('simple', function (t) {
   rimraf.sync(linksPath)
 
   var db = Flume(FlumeLog(path.join(linksPath, 'log.offset'), 1024, codec.json))
-            .use('links', Query(1, indexes))
+            .use('links', Query(1, {indexes:indexes}))
 
   var links = db.links
   var live = []
