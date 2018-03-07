@@ -17,6 +17,23 @@ var posts_later_than_time = {
   "timestamp": {"$gt": 1516596815720}
 }
 
+var encrypted_content_after_time = {
+  "value": {
+      "content": { "$is": "string"},
+  },
+  "timestamp": {"$gt": 1516596815720}
+}
+
+var encrypted_content_after_time_by_author = {
+  "value": {
+      "content": { "$is": "string"},
+      "author": "@bob",
+  },
+  "timestamp": {"$gt": 1516596815720}
+}
+
+
+
 test('simple', function (t) {
 
   var q = posts_later_than_time
@@ -25,6 +42,27 @@ test('simple', function (t) {
   t.deepEqual(query(select(indexes, q), q, true), {
     gte: ['typ', 'post', 1516596815720],
     lte: ['typ', 'post', undefined]
+  })
+  t.end()
+})
+
+test('right hand match not selected 1', function (t) {
+
+  var q = encrypted_content_after_time
+  t.deepEqual(select(indexes, q), undefined)
+
+  t.end()
+})
+
+
+test('right hand match not selected 2', function (t) {
+
+  var q = encrypted_content_after_time_by_author
+  t.deepEqual(select(indexes, q), indexes[0])
+
+  t.deepEqual(query(select(indexes, q), q, true), {
+    gte: ['clk', '@bob', null],
+    lte: ['clk', '@bob', undefined]
   })
   t.end()
 })
@@ -46,3 +84,4 @@ test('from random', function (t) {
   t.end()
 
 })
+

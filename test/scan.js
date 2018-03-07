@@ -51,7 +51,8 @@ tape('simple', function (t) {
   var data = []
   for(var i = 0;i < 100;i ++)
     data.push({
-      count: i, random: Math.random(), timestamp: Date.now(), okay: true
+      count: i, random: Math.random(), timestamp: Date.now(), okay: true,
+      mixed: Math.random() > 0.5 ? {} : 'hello!'
     })
 
   t.test('load', function (t) {
@@ -88,8 +89,19 @@ tape('simple', function (t) {
     })
   })
 
+  t.test('query for strings', function (t) {
+
+    all(query.read({query: [{
+      $filter: { mixed: {$is: 'string'}}
+    }]}), function (err, ary) {
+      if(err) throw err
+      t.ok(ary.length)
+      ary.forEach(function (e) {
+        t.equal(e.mixed, 'hello!')
+      })
+      t.end()
+    })
+  })
 })
-
-
 
 

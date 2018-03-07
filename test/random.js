@@ -51,12 +51,12 @@ var data = []
 test('init', function (t) {
   for(var i = 0; i < 100; i++)
     data.push({
-      index: i, random: Math.random(), timestamp: timestamp()
+      index: i, random: Math.random(), timestamp: timestamp(),
+      mixed: [true, {}, 'string!'][~~(3*Math.random())]
     })
 
   db.append(data, function (err, seq) {
     if(err) throw err
-    console.log(seq)
     t.end()
   })
 })
@@ -89,6 +89,8 @@ function randomQuery (data) {
     {timestamp: {$gte: data.timestamp}},
     {timestamp: {$lt: data.timestamp}},
     {timestamp: {$lte: data.timestamp}},
+
+    {mixed: {$is: typeof data.mixed}}
   ]
 
   var join = []
