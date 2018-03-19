@@ -25,7 +25,7 @@ module.exports = function (version, opts) {
   var map = opts.map
   var exact = opts.exact !== false
 
-  var create = FlumeViewLevel(version || 1, function (data, seq) {
+  var create = FlumeViewLevel(version || 2, function (data, seq) {
     if(!filter(data)) return []
     var A = []
     indexes.forEach(function (index) {
