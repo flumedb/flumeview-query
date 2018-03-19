@@ -70,7 +70,6 @@ module.exports = function (version, opts) {
       _opts.live = opts.live
       _opts.old = opts.old
       _opts.sync = opts.sync
-      _opts.limit = opts.limit
       return _opts
     }
 
@@ -96,4 +95,5 @@ module.exports = function (version, opts) {
     return view
   }
 }
+
 
