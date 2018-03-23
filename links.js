@@ -97,7 +97,7 @@ module.exports = function (indexes, links, version) {
           return o
         }),
         isArray(opts.query) ? mfr(opts.query) : pull.through(),
-        opts.limit ? pull.take(opts.limit) : pull.through(),
+        opts.limit ? pull.take(opts.limit) : pull.through()
       )
     }
     return index
