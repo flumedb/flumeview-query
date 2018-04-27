@@ -86,12 +86,13 @@ module.exports = function (indexes, links, version) {
       _opts.live = opts.live
       _opts.old = opts.old
       _opts.sync = opts.sync
+      _opts.includeOriginalMessageValue = opts.includeOriginalMessageValue
 
       return pull(
         read(_opts),
         pull.map(function (data) {
           if(data.sync) return data
-          var o = {}
+          var o = opts.includeOriginalMessageValue ? data.value : {}
           for(var i = 0; i < index.value.length; i++)
             u.set(index.value[i], data.key[i+1], o)
           return o
