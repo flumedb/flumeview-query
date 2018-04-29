@@ -49,7 +49,6 @@ module.exports = function (version, opts) {
     view.explain = function (opts) {
 
       opts = opts || {}
-      var _opts = {}
       var q, k
 
       if(isArray(opts.query)) {

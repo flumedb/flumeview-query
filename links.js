@@ -50,7 +50,6 @@ module.exports = function (indexes, links, version) {
     index.read = function (opts) {
 
       opts = opts || {}
-      var _opts = {}
       var q, k
 
       if(isArray(opts.query)) {
@@ -77,6 +76,7 @@ module.exports = function (indexes, links, version) {
             return emit
           })
         )
+
       var _opts = query(index, q)
 
       _opts.values = true
@@ -86,13 +86,13 @@ module.exports = function (indexes, links, version) {
       _opts.live = opts.live
       _opts.old = opts.old
       _opts.sync = opts.sync
-      _opts.includeOriginalMessageValue = opts.includeOriginalMessageValue
+      _opts.unlinkedValues = opts.unlinkedValues
 
       return pull(
         read(_opts),
         pull.map(function (data) {
           if(data.sync) return data
-          var o = opts.includeOriginalMessageValue ? data.value : {}
+          var o = opts.unlinkedValues ? data.value : {}
           for(var i = 0; i < index.value.length; i++)
             u.set(index.value[i], data.key[i+1], o)
           return o
