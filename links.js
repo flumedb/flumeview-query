@@ -66,7 +66,7 @@ module.exports = function (indexes, links, version) {
       if(!index)
         return pull(
           log.stream({
-            values: true, seqs: false, live: opts.live, limit: opts.limit, reverse: opts.reverse
+            values: true, seqs: false, live: opts.live, old: opts.old, limit: opts.limit, reverse: opts.reverse
           }),
           Flatmap(function (data) {
             var emit = []
