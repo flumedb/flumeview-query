@@ -10,6 +10,13 @@ var Flatmap = require('pull-flatmap')
 var FlumeViewLevel = require('flumeview-level')
 
 var isArray = Array.isArray
+var findByKey = function (indexes, key) {
+  for (var i = 0; i < indexes.length; i++) {
+    if (indexes[i] && indexes[i].key === key) {
+      return indexes[i]
+    }
+  }
+}
 
 //sorted index.
 
@@ -61,7 +68,9 @@ module.exports = function (indexes, links, version) {
       else
         q = {}
 
-      var index = select(indexes, q)
+      var index = opts.index 
+        ? findByKey(indexes, opts.index)
+        : select(indexes, q)
 
       if(!index)
         return pull(
@@ -104,5 +113,3 @@ module.exports = function (indexes, links, version) {
     return index
   }
 }
-
-
