@@ -1,8 +1,5 @@
 var Q = require('map-filter-reduce/util')
-var select = require('./select')
 var get = require('./util').get
-
-function id (e) { return e }
 
 module.exports = function (index, query, exact) {
 
