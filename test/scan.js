@@ -100,7 +100,7 @@ tape('simple', function (t) {
       $filter: { count: {$gte: gte}, okay:true}
     }], limit: limit})
   }
-  return
+
   t.test('query, seek', function (t) {
     all(seek(10, 10), function (err, ary) {
       if(err) throw err
@@ -136,6 +136,7 @@ tape('simple', function (t) {
     })
   })
 })
+
 
 
 
