@@ -66,8 +66,11 @@ module.exports = function (version, opts) {
       _opts.values = true
       _opts.keys = true
       _opts.reverse = !!opts.reverse
-      _opts.live = opts.live
-      _opts.old = opts.old
+      //same default logic as pull-live
+      _opts.old = (opts.old !== false)
+      _opts.live = (opts.live === true || opts.old === false)
+
+      //TODO test coverage for live/old
       _opts.sync = opts.sync
       return _opts
     }
@@ -78,7 +81,10 @@ module.exports = function (version, opts) {
         (_opts.scan
         ? log.stream({
             values: true, seqs: false,
-            live: opts.live, reverse: opts.reverse
+            //TODO test coverage for live/old - the tests arn't right for live when the log starts as empty
+            old: (opts.old !== false),
+            live: (opts.live === true || opts.old === false),
+            reverse: opts.reverse
           })
         : pull(
             read(_opts),
@@ -94,5 +100,4 @@ module.exports = function (version, opts) {
     return view
   }
 }
-
 
