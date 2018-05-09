@@ -17,8 +17,8 @@
     "pull-stream": "^3.4.0"
   },
   "devDependencies": {
-    "flumedb": "^0.1.0",
-    "flumelog-offset": "0.0.3",
+    "flumedb": "^0.4.6",
+    "flumelog-offset": "^3.2.6",
     "level-codec": "^6.2.0",
     "monotonic-timestamp": "0.0.9",
     "osenv": "^0.1.3",
