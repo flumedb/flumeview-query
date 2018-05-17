@@ -24,6 +24,33 @@ module.exports = function (version, opts) {
   var map = opts.map
   var exact = opts.exact !== false
 
+  function fullScan (log, opts) {
+    return pull(
+      log.stream({
+        values: true, seqs: false,
+        //TODO test coverage for live/old - the tests arn't right for live when the log starts as empty
+        old: (opts.old !== false),
+        live: (opts.live === true || opts.old === false),
+        reverse: opts.reverse
+      }),
+      opts.filter !== false && isArray(opts.query) && mfr(opts.query),
+      opts.limit && pull.take(opts.limit)
+    )
+  }
+
+  function createMemoryIndex (log, name) {
+   return {
+      since: log.since,
+      get: log.get,
+      methods: { get: 'async', read: 'source'},
+      read: function (opts) {
+        var filter = isArray(opts.query) ? mfr(opts.query) : pull.through()
+        return pull(fullScan(log, opts), filter)
+      },
+      createSink: function (cb) {return pull.onEnd(cb) }
+    }
+  }
+
   var create = FlumeViewLevel(version || 2, function (data, seq) {
     if(!filter(data)) return []
     var A = []
@@ -41,6 +68,7 @@ module.exports = function (version, opts) {
   })
 
   return function (log, name) {
+    if(!log.filename || !indexes.length) return createMemoryIndex(log, name)
 
     var view = create(log, name)
     var read = view.read
@@ -78,13 +106,7 @@ module.exports = function (version, opts) {
       var _opts = view.explain(opts = opts || {})
       return pull(
         (_opts.scan
-        ? log.stream({
-            values: true, seqs: false,
-            //TODO test coverage for live/old - the tests arn't right for live when the log starts as empty
-            old: (opts.old !== false),
-            live: (opts.live === true || opts.old === false),
-            reverse: opts.reverse
-          })
+        ? fullScan(log, opts)
         : pull(
             read(_opts),
             pull.map(function (data) {
