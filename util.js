@@ -1,3 +1,5 @@
+var deepEqual = require('deep-equal')
+
 exports.has = function has (key, obj) {
   if('string' === typeof key)
     return Object.hasOwnProperty.call(obj, key)
@@ -29,5 +31,12 @@ exports.set = function set(key, value, obj) {
     obj[key[key.length -1]] = value
   }
 }
+
+exports.findByPath = function (indexes, path) {
+  return indexes.find(function (index) {
+    return deepEqual(index.value, path)
+  })
+}
+
 
 
