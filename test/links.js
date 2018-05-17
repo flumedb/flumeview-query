@@ -93,6 +93,23 @@ tape('simple', function (t) {
 
   })
 
+  t.test('specify index', function (t) {
+    all(links.read({index: 'DRS'}), function (err, ary) {
+      if(err) throw err
+      t.deepEqual(ary, [ 
+        { rel: 'end', dest: 'END', source: 'READY' },
+        { rel: 'end', dest: 'END', source: 'START' },
+        { rel: 'error', dest: 'END', source: 'END' },
+        { rel: 'error', dest: 'ERROR', source: 'READY' },
+        { rel: 'error', dest: 'ERROR', source: 'START' },
+        { rel: 'read', dest: 'READY', source: 'START' },
+        { rel: 'read', dest: 'START', source: 'READY' } 
+      ])
+      t.end()
+    })
+
+  })
+
   t.test('live', function (t) {
     t.deepEqual(live, raw.filter(function (e) { return e.rel[0] == 'e' }))
 //[{

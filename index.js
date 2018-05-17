@@ -11,7 +11,13 @@ var FlumeViewLevel = require('flumeview-level')
 var isArray = Array.isArray
 var isNumber = function (n) { return 'number' === typeof n }
 var isObject = function (o) { return o && 'object' === typeof o && !isArray(o) }
-
+var findByKey = function (indexes, key) {
+  for (var i = 0; i < indexes.length; i++) {
+    if (indexes[i] && indexes[i].key === key) {
+      return indexes[i]
+    }
+  }
+}
 
 //sorted index.
 
@@ -88,7 +94,10 @@ module.exports = function (version, opts) {
       else
         q = {}
 
-      var index = select(indexes, q)
+      var index = opts.index
+        ? findByKey(indexes, opts.index)
+        : select(indexes, q)
+        
       if(!index) return {scan: true}
       var _opts = query(index, q, exact)
       _opts.values = true
