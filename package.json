@@ -17,6 +17,7 @@
   },
   "devDependencies": {
     "flumedb": "^0.4.6",
+    "flumelog-memory": "^0.1.3",
     "flumelog-offset": "^3.2.6",
     "level-codec": "^6.2.0",
     "monotonic-timestamp": "0.0.9",
