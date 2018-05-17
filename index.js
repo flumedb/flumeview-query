@@ -76,10 +76,11 @@ module.exports = function (version, opts) {
     view.explain = function (opts) {
 
       opts = opts || {}
-      var q, k
+      var q, k, sort
 
       if(isArray(opts.query)) {
         q = opts.query[0].$filter || {}
+        sort = opts.query[opts.query.length-1].$sort
       }
       else if(opts.query) {
         q = opts.query
@@ -87,9 +88,10 @@ module.exports = function (version, opts) {
       else
         q = {}
 
-      var index = opts.index
-        ? u.findByPath(indexes, opts.index)
-        : select(indexes, q)
+
+      var index = sort ? u.findByPath(indexes, sort) : select(indexes, q)
+
+      if(sort && !index) return pull.error(new Error('could not sort by:'+JSON.stringify(sort)))
 
       if(!index) return {scan: true}
       var _opts = query(index, q, exact)
@@ -124,4 +126,8 @@ module.exports = function (version, opts) {
     return view
   }
 }
+
+
+
+
 

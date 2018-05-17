@@ -48,10 +48,15 @@ module.exports = function (indexes, links, version) {
     index.read = function (opts) {
 
       opts = opts || {}
-      var q, k
+      var q, k, sort
+
+      opts = opts || {}
+      var q, k, sort
 
       if(isArray(opts.query)) {
         q = opts.query[0].$filter || {}
+        sort = opts.query[opts.query.length-1].$sort
+        if(sort) opts.query.pop()
       }
       else if(opts.query) {
         q = opts.query
@@ -59,9 +64,10 @@ module.exports = function (indexes, links, version) {
       else
         q = {}
 
-      var index = opts.index
-        ? u.findByPath(indexes, opts.index)
-        : select(indexes, q)
+
+      var index = sort ? u.findByPath(indexes, sort) : select(indexes, q)
+
+      if(sort && !index) return pull.error(new Error('could not sort by:'+JSON.stringify(sort)))
 
       if(!index)
         return pull(
@@ -104,5 +110,10 @@ module.exports = function (indexes, links, version) {
     return index
   }
 }
+
+
+
+
+
 
 
