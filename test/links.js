@@ -94,7 +94,7 @@ tape('simple', function (t) {
   })
 
   t.test('specify index', function (t) {
-    all(links.read({index: 'DRS'}), function (err, ary) {
+    all(links.read({index: ['dest', 'rel', 'source']}), function (err, ary) {
       if(err) throw err
       t.deepEqual(ary, [ 
         { rel: 'end', dest: 'END', source: 'READY' },
@@ -127,18 +127,4 @@ tape('simple', function (t) {
     t.end()
   })
 })
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
