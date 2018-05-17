@@ -39,6 +39,7 @@ module.exports = function (version, opts) {
   }
 
   function createMemoryIndex (log, name) {
+    console.error('flumeview-query:', name, 'in memory log or no indexes defined, will always use full scan, queries will likely be slow')
    return {
       since: log.since,
       get: log.get,
