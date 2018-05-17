@@ -8,6 +8,7 @@
     "url": "git://github.com/flumedb/flumeview-query.git"
   },
   "dependencies": {
+    "deep-equal": "^1.0.1",
     "flumeview-level": "^3.0.0",
     "map-filter-reduce": "^3.0.5",
     "pull-flatmap": "0.0.1",
