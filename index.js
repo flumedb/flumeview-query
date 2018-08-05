@@ -20,7 +20,7 @@ module.exports = function (version, opts) {
   if(!isObject(opts)) throw new Error('flumeview-query: expected opts as second arg')
   var indexes = opts.indexes
   var filter = opts.filter || function () { return true }
-  var map = opts.map
+  var map = opts.map || function (item) { return item }
   var exact = opts.exact !== false
 
   function fullScan (log, opts) {
@@ -32,6 +32,7 @@ module.exports = function (version, opts) {
         live: (opts.live === true || opts.old === false),
         reverse: opts.reverse
       }),
+      pull.map(map),
       opts.filter !== false && isArray(opts.query) && mfr(opts.query),
       opts.limit && pull.take(opts.limit)
     )
@@ -52,7 +53,8 @@ module.exports = function (version, opts) {
   }
 
   var create = FlumeViewLevel(version || 2, function (data, seq) {
-    if(!filter(data)) return []
+    data = map(data)
+    if (!filter(data)) return []
     var A = []
     indexes.forEach(function (index) {
       var a = [index.key]
@@ -115,7 +117,7 @@ module.exports = function (version, opts) {
         : pull(
             read(_opts),
             pull.map(function (data) {
-              return data.sync ? data : data.value
+              return data.sync ? data : map(data.value)
             })
           )
         ),
@@ -126,8 +128,3 @@ module.exports = function (version, opts) {
     return view
   }
 }
-
-
-
-
-
