@@ -23,17 +23,22 @@ module.exports = function (version, opts) {
   var map = opts.map || function (item) { return item }
   var exact = opts.exact !== false
 
+  //answer this query by reading the entire log.
+  //not efficient, but still returns the correct answer
   function fullScan (log, opts) {
+    return log.stream({
+      values: true, seqs: false,
+      //TODO test coverage for live/old - the tests arn't right for live when the log starts as empty
+      old: (opts.old !== false),
+      live: (opts.live === true || opts.old === false),
+      reverse: opts.reverse
+    })
+  }
+
+  function createFilter(source, opts) {
     return pull(
-      log.stream({
-        values: true, seqs: false,
-        //TODO test coverage for live/old - the tests arn't right for live when the log starts as empty
-        old: (opts.old !== false),
-        live: (opts.live === true || opts.old === false),
-        reverse: opts.reverse
-      }),
-      pull.map(map),
-      opts.filter !== false && isArray(opts.query) && mfr(opts.query),
+      source,
+      isArray(opts.query) ? mfr(opts.query) : pull.through(),
       opts.limit && pull.take(opts.limit)
     )
   }
@@ -45,8 +50,7 @@ module.exports = function (version, opts) {
       get: log.get,
       methods: { get: 'async', read: 'source'},
       read: function (opts) {
-        var filter = isArray(opts.query) ? mfr(opts.query) : pull.through()
-        return pull(fullScan(log, opts), filter)
+        return createFilter(fullScan(log, opts), opts)
       },
       createSink: function (cb) {return pull.onEnd(cb) }
     }
@@ -111,20 +115,36 @@ module.exports = function (version, opts) {
 
     view.read = function (opts) {
       var _opts = view.explain(opts = opts || {})
-      return pull(
-        (_opts.scan
+      return createFilter(_opts.scan
         ? fullScan(log, opts)
         : pull(
             read(_opts),
             pull.map(function (data) {
               return data.sync ? data : map(data.value)
             })
-          )
-        ),
-        opts.filter !== false && isArray(opts.query) && mfr(opts.query),
-        opts.limit && pull.take(opts.limit)
+          ),
+        opts
       )
+//      return pull(
+//        (_opts.scan
+//        ? fullScan(log, opts)
+//        : pull(
+//            read(_opts),
+//            pull.map(function (data) {
+//              return data.sync ? data : map(data.value)
+//            })
+//          )
+//        ),
+//        opts.filter !== false && isArray(opts.query) && mfr(opts.query),
+//        opts.limit && pull.take(opts.limit)
+//      )
     }
     return view
   }
 }
+
+
+
+
+
+
