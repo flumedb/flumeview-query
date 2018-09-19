@@ -12,13 +12,19 @@ var isArray = Array.isArray
 var isNumber = function (n) { return 'number' === typeof n }
 var isObject = function (o) { return o && 'object' === typeof o && !isArray(o) }
 
+function clone (obj) {
+  var o = {}
+  for(var k in obj)
+    o[k] = obj[k]
+  return o
+}
+
 //sorted index.
 
 //split this into TWO modules. flumeview-links and flumeview-query
 module.exports = function (version, opts) {
   if(!isNumber(version)) throw new Error('flumeview-query:version expected as first arg')
   if(!isObject(opts)) throw new Error('flumeview-query: expected opts as second arg')
-  var indexes = opts.indexes
   var filter = opts.filter || function () { return true }
   var map = opts.map || function (item) { return item }
   var exact = opts.exact !== false
@@ -56,27 +62,44 @@ module.exports = function (version, opts) {
     }
   }
 
-  var create = FlumeViewLevel(version || 2, function (data, seq) {
-    data = map(data)
-    if (!filter(data)) return []
-    var A = []
-    indexes.forEach(function (index) {
-      var a = [index.key]
-      for(var i = 0; i < index.value.length; i++) {
-        var key = index.value[i]
-        if(!u.has(key, data)) return []
-        a.push(u.get(key, data))
-      }
-      if(!exact) a.push(seq);
-      A.push(a)
-    })
-    return A
-  })
-
   return function (log, name) {
-    if(!log.filename || !indexes.length) return createMemoryIndex(log, name)
+    if(!log.filename || !opts.indexes.length) return createMemoryIndex(log, name)
 
-    var view = create(log, name)
+
+    var indexes = opts.indexes.map(function (e) {
+      return {
+        key: e.key,
+        value: e.value,
+        createStream: function (opts) {
+          opts = clone(opts)
+          opts.lte.unshift(e.key)
+          opts.gte.unshift(e.key)
+          if(!(opts.lte[0] == e.key && opts.gte[0] == e.key))
+            throw new Error('index key missing from options')
+          return read(opts)
+        }
+      }
+    })
+
+    var view = FlumeViewLevel(version || 2, function (data, seq) {
+      data = map(data)
+      if (!filter(data)) return []
+      var A = []
+      indexes.forEach(function (index) {
+        var a = [index.key]
+        for(var i = 0; i < index.value.length; i++) {
+          var key = index.value[i]
+          if(!u.has(key, data)) return []
+          a.push(u.get(key, data))
+        }
+        if(!exact) a.push(seq);
+        A.push(a)
+      })
+      return A
+    })(log, name)
+
+
+
     var read = view.read
     view.methods.explain = 'sync'
     view.explain = function (opts) {
@@ -94,7 +117,6 @@ module.exports = function (version, opts) {
       else
         q = {}
 
-
       var index = sort ? u.findByPath(indexes, sort) : select(indexes, q)
 
       if(sort && !index) return pull.error(new Error('could not sort by:'+JSON.stringify(sort)))
@@ -107,7 +129,7 @@ module.exports = function (version, opts) {
       //same default logic as pull-live
       _opts.old = (opts.old !== false)
       _opts.live = (opts.live === true || opts.old === false)
-
+      _opts.createStream = index.createStream
       //TODO test coverage for live/old
       _opts.sync = opts.sync
       return _opts
@@ -118,33 +140,17 @@ module.exports = function (version, opts) {
       return createFilter(_opts.scan
         ? fullScan(log, opts)
         : pull(
-            read(_opts),
+            _opts.createStream(_opts),
             pull.map(function (data) {
               return data.sync ? data : map(data.value)
             })
           ),
         opts
       )
-//      return pull(
-//        (_opts.scan
-//        ? fullScan(log, opts)
-//        : pull(
-//            read(_opts),
-//            pull.map(function (data) {
-//              return data.sync ? data : map(data.value)
-//            })
-//          )
-//        ),
-//        opts.filter !== false && isArray(opts.query) && mfr(opts.query),
-//        opts.limit && pull.take(opts.limit)
-//      )
     }
     return view
   }
 }
-
-
-
 
 
 

@@ -12,7 +12,7 @@ module.exports = function (index, query, exact) {
   }
 
   function build (index, map, b) {
-    var a = [index.key]
+    var a = []
     for(var i = 0; i < index.value.length; i++)
       a.push(map(get(index.value[i], query)))
     if(!exact) a.push(b)
@@ -30,5 +30,7 @@ module.exports = function (index, query, exact) {
   }
 
 }
+
+
 
 
