@@ -40,8 +40,8 @@ test('simple', function (t) {
   t.deepEqual(select(indexes, q), indexes[1])
 
   t.deepEqual(query(select(indexes, q), q, true), {
-    gte: ['typ', 'post', 1516596815720],
-    lte: ['typ', 'post', undefined]
+    gte: ['post', 1516596815720],
+    lte: ['post', undefined]
   })
   t.end()
 })
@@ -61,8 +61,8 @@ test('right hand match not selected 2', function (t) {
   t.deepEqual(select(indexes, q), indexes[0])
 
   t.deepEqual(query(select(indexes, q), q, true), {
-    gte: ['clk', '@bob', null],
-    lte: ['clk', '@bob', undefined]
+    gte: ['@bob', null],
+    lte: ['@bob', undefined]
   })
   t.end()
 })
@@ -77,8 +77,8 @@ test('from random', function (t) {
     t.deepEqual(select(indexes, q), indexes[0])
 
   t.deepEqual(query(select(indexes, q), q, true), {
-    gte: ['i', null],
-    lte: ['i', 52]
+    gte: [ null],
+    lte: [52]
   })
 
   t.end()

@@ -24,8 +24,8 @@ tape('source and dest are exact', function (t) {
   t.deepEqual(
     Query({source: 'foo', dest: 'bar'}),
     {
-      gte: ['SDR', 'foo', 'bar', Q.LO, Q.LO],
-      lte: ['SDR', 'foo', 'bar', Q.HI, Q.HI]
+      gte: ['foo', 'bar', Q.LO, Q.LO],
+      lte: ['foo', 'bar', Q.HI, Q.HI]
     }
   )
 
@@ -73,15 +73,12 @@ tape('query works on {$prefix} inside an array', function (t) {
       rel: ['mentions', {$prefix: "@"}]
     }),
     {"gte":
-        ["RDS",["mentions","@"],null, null, null],
+        [["mentions","@"],null, null, null],
       "lte":
-        ["RDS",["mentions","@\uffff"],undefined, undefined, undefined]
+        [["mentions","@\uffff"],undefined, undefined, undefined]
     }
   )
 
   t.end()
 })
-
-
-
 
