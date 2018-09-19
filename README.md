@@ -27,6 +27,17 @@ pull(
 )
 ```
 
+## new api
+
+flumeview-query shouldn't hold the indexes, it should just know what
+to do with them. Instead of passing in the indexes to create,
+pass in an index which can be used. that index would need to 
+expose what paths it indexes, of course.
+
+```
+query.add(index, createStream) //add an index
+```
+
 ## Indexes
 
 The indexes argument is an array of indexes that flumeview-query will
