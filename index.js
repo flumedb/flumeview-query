@@ -9,6 +9,7 @@ var Indexes = require('./indexes')
 var isArray = Array.isArray
 var isNumber = function (n) { return 'number' === typeof n }
 var isObject = function (o) { return o && 'object' === typeof o && !isArray(o) }
+function isFunction (f) { return 'function' == typeof f }
 
 function clone (obj) {
   var o = {}
@@ -23,7 +24,7 @@ function clone (obj) {
 module.exports = function (version, opts) {
   if(!isNumber(version)) throw new Error('flumeview-query:version expected as first arg')
   if(!isObject(opts)) throw new Error('flumeview-query: expected opts as second arg')
-//  var exact = opts.exact !== false
+
   //answer this query by reading the entire log.
   //not efficient, but still returns the correct answer
   function fullScan (log, opts) {
@@ -61,9 +62,12 @@ module.exports = function (version, opts) {
     if(!log.filename || !opts.indexes.length) return createMemoryIndex(log, name)
 
     var view = Indexes(version, opts)(log, name)
+    var indexes = [].concat(view.indexes())
 
     view.methods.explain = 'sync'
-    view.explain = Explain(view.indexes, function (opts) {
+    view.methods.add = 'sync'
+
+    view.explain = Explain(indexes, function (opts) {
       opts.seqs = false; opts.values = true
       return log.stream(opts)
     })
@@ -71,6 +75,17 @@ module.exports = function (version, opts) {
    view.read = function (opts) {
       var _opts = view.explain(opts)
       return Filter(_opts.createStream(_opts), opts)
+    }
+
+    view.add = function (opts) {
+      if(!(
+        opts &&
+        isFunction(opts.createStream) &&
+        isArray(opts.index || opts.value)
+      ))
+        throw new Error('flumeview-query.add: expected {index, createStream}')
+      opts.value = opts.index || opts.value
+      indexes.push(opts)
     }
 
     return view
