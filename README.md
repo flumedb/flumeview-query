@@ -21,10 +21,35 @@ of privacy oriented decentralization))
 
 ``` js
 var db = Flume(log).use('query', FlumeQuery(null, {indexes:indexes}))
-pull(
-  db.links.read({query: query}),
-  ...
-)
+
+//write a batch of data to the log
+db.append([{
+  foo: true,
+  bar: 5,
+  nested: {baz: 'okay'}
+},
+{
+  foo: false,
+  bar: 6,
+  nested: {baz: 'okay'}
+},
+{
+  foo: false,
+  bar: 7,
+  nested: {baz: 'not-okay'}
+},
+], function (err) {
+  //filter for all records which match the above query
+  pull(
+    db.query.read({query: [
+      {$filter: {nested: {baz: 'okay'}}}
+    ]}),
+    pull.collect(function (err, ary) {
+      console.log(ary)
+      //out puts the first and second items inserted above.
+    })
+  )
+})
 ```
 
 ## new api
@@ -97,8 +122,7 @@ queries, if the filter stage uses fields that are in a index, then
 quickly.
 
 See [map-filter-reduce](https://github.com/dominictarr/map-filter-reduce) for documentation of the syntax,
-and [ssb-links](https://github.com/dominictarr/ssb-links) for example
-queries, performed on top of [secure-scuttlebutt](https://github.com/ssbc/secure-scuttlebutt)
+for example queries, performed on top of [secure-scuttlebutt](https://github.com/ssbc/secure-scuttlebutt)
 
 ## api : flumedb.use("query", FlumeViewQuery(version, opts))
 
@@ -108,12 +132,23 @@ change the version and the index will rebuild.
 
 Here we use the name "query", you can use any name.
 
-### flumedb.query.read({query:MFR_query, limit, reverse, live, old})
+## api : FlumeViewQuery(version, {indexes, filter, map}) => FlumeView: query
+
+as required by every flumeview, `version` is a integer. change this
+when the indexes or other settings change and the view will be rebuilt.
+`indexes` is mandatory. Indexes are the paths supported.
+`indexes` to use. `links` is an optional function used for mapping a
+value into one or more values for the index. `version` must be an
+number. When you change `indexes` or `links`, bump the version and the
+index will rebuild.
+
+### query.read({query:MFR_query, limit, reverse, live, old})
 
 Perform the query! limit, reverse, live, old are stardard as with
-other flume streams.
+other flume streams. `unlinkedValues` is an option that can be used to
+include the values not part of the index in the return value.
 
-### flumedb.explain ({query:MFR_query, limit, reverse, live, old}) => obj
+### query.explain ({query:MFR_query, limit, reverse, live, old}) => obj
 
 Figure out what indexes are best to use to perform a query, but do not
 actually run the query! If a query is slow or doesn't seem to be
@@ -122,22 +157,16 @@ going on. If the return value is `{scan: true}` that means no indexes
 are being used. If an index is selected, that should mean it's more
 efficient, but it might still be filtering the output.
 
-## api : flumedb.use("links", FlumeViewLinks(indexes, links, version))
 
-`indexes` to use. `links` is an optional function used for mapping a
-value into one or more values for the index. `version` must be an
-number. When you change `indexes` or `links`, bump the version and the
-index will rebuild.
-
-Here we use the name "links", you can use any name.
-
-### flumedb.links.read({query:MFR_query, limit, reverse, live, old, unlinkedValues})
-
-Perform the query! limit, reverse, live, old are stardard as with
-other flume streams. `unlinkedValues` is an option that can be used to
-include the values not part of the index in the return value.
 
 ## License
 
 MIT
+
+
+
+
+
+
+
 
