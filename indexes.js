@@ -14,14 +14,13 @@ module.exports = function (version, opts) {
   var filter = opts.filter || function () { return true }
   var map = opts.map || function (item) { return item }
   var exact = opts.exact !== false
-  var indexes = opts.indexes
 
   return function (log, name) {
-    indexes = indexes.map(function (e) {
+    var indexes = opts.indexes.map(function (e) {
       return {
         key: e.key,
         value: e.value,
-        exact: exact,
+        exact: 'boolean' === typeof e.exact ? e.exact : exact,
         createStream: function (opts) {
           opts = clone(opts)
           opts.lte.unshift(e.key)
@@ -44,6 +43,7 @@ module.exports = function (version, opts) {
       if (!filter(data)) return []
       var A = []
       indexes.forEach(function (index) {
+
         var a = [index.key]
         for(var i = 0; i < index.value.length; i++) {
           var key = index.value[i]
@@ -56,9 +56,12 @@ module.exports = function (version, opts) {
       return A
     })(log, name)
     var read = view.read
-    view.indexes = indexes
+
+    view.methods.indexes = 'sync'
+    view.indexes = function () { return indexes }
 
     return view
   }
 }
+
 
