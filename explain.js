@@ -4,6 +4,7 @@ var select = require('./select')
 var pull = require('pull-stream')
 var isArray = Array.isArray
 
+var u = require('./util')
 
 module.exports = function (indexes, scan) {
   return function explain (opts) {
@@ -20,9 +21,7 @@ module.exports = function (indexes, scan) {
     else
       q = {}
 
-    var index = sort ? u.findByPath(indexes, sort) : select(indexes, q)
-
-    if(sort && !index) return pull.error(new Error('could not sort by:'+JSON.stringify(sort)))
+    var index = sort && u.findByPath(indexes, sort) || select(indexes, q)
 
     if(!index) return {
       scan: true,
@@ -44,4 +43,5 @@ module.exports = function (indexes, scan) {
     return _opts
   }
 }
+
 
