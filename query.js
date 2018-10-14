@@ -7,7 +7,8 @@ module.exports = function (index, query, exact) {
     return (
       value == null    ? sentinel
     : Q.isRange(value) ? range(value)
-    :                    value
+    : Q.isExact(value) ? value
+    :                    sentinel
     )
   }
 
@@ -30,6 +31,7 @@ module.exports = function (index, query, exact) {
   }
 
 }
+
 
 
 
