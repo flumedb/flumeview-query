@@ -1,10 +1,26 @@
 var test = require('tape')
+var charwise = require('charwise')
+//old ssb-query indexes
 var indexes = [
   {key: 'clk', value: [['value', 'author'], ['value', 'sequence']] },
   {key: 'typ', value: [['value', 'content', 'type'], ['timestamp']] },
-//  {key: 'hsh', value: ['key']},
   {key: 'cha', value: [['value', 'content', 'channel'], ['timestamp']] },
   {key: 'aty', value: [['value', 'author'], ['value', 'content', 'type'], ['timestamp']]}
+]
+
+
+//more indexes keep on being added to ssb-query...
+var newIndexes = [
+  {key: 'log', value: ['timestamp']}, //duplicate of an ssb index
+  {key: 'vtt', value: [ ['value', 'timestamp'], ['timestamp']]},
+  {key: 'clk', value: [['value', 'author'], ['value', 'sequence']] }, //duplicate
+  {key: 'typ', value: [['value', 'content', 'type'], ['timestamp']] }, //messages by type
+  {key: 'tya', value: [['value', 'content', 'type'], ['value', 'timestamp']] },
+  {key: 'cha', value: [['value', 'content', 'channel'], ['timestamp']] },
+  {key: 'aty', value: [['value', 'author'], ['value', 'content', 'type'], ['timestamp']]},
+  {key: 'ata', value: [['value', 'author'], ['value', 'content', 'type'], ['value', 'timestamp']]},
+  {key: 'art', value: [['value', 'content', 'root'], ['value', 'timestamp']]},
+  {key: 'lor', value: [['rts']]}
 ]
 
 var select = require('../select')
@@ -84,4 +100,24 @@ test('from random', function (t) {
   t.end()
 
 })
+
+test('$ne should not be passed to an index', function (t) {
+  var q = {
+      value: {
+        timestamp: {$gt: 0 },
+        author: { $ne: '@ye+QM09iPcDJD6YvQYjoQc7sLF/IFhmNbEqgdzQo3lQ=.ed25519' },
+        content: { type: 'post' }
+      }
+    }
+  var result = select(newIndexes, q, true)
+  var opts = query(result.index, q, true)
+  charwise.encode(opts.gte)
+  console.log(result)
+  t.end()
+})
+
+
+
+
+
 
