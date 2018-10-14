@@ -21,15 +21,16 @@ module.exports = function (indexes, scan) {
     else
       q = {}
 
-    var index = sort && u.findByPath(indexes, sort) || select(indexes, q)
-
+    var r = sort && {index: u.findByPath(indexes, sort), scores: {}} || select(indexes, q, true)
+    var index = r.index
     if(!index) return {
       scan: true,
       createStream: scan,
       reverse: !!opts.reverse,
       live: !!(opts.live === true || opts.old === false),
       old: opts.old !== false,
-      sync: !!opts.sync
+      sync: !!opts.sync,
+      //also return the name of the index and the scores for indexes considered!
     }
 
     var _opts = query(index, q, index.exact)
@@ -40,8 +41,9 @@ module.exports = function (indexes, scan) {
     _opts.createStream = index.createStream
     //TODO test coverage for live/old
     _opts.sync = opts.sync
+    _opts.index = index.key,
+    _opts.scores = r.scores
     return _opts
   }
 }
-
 
