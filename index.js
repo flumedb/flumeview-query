@@ -59,7 +59,7 @@ module.exports = function (version, opts) {
   }
 
   return function (log, name) {
-    if(!log.filename || !opts.indexes.length) return createMemoryIndex(log, name)
+    if(!log.filename) return createMemoryIndex(log, name)
 
     var view = Indexes(version, opts)(log, name)
     var indexes = [].concat(view.indexes())
@@ -91,4 +91,6 @@ module.exports = function (version, opts) {
     return view
   }
 }
+
+
 
