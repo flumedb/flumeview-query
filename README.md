@@ -145,7 +145,8 @@ index will rebuild.
 ### query.read({query:MFR_query, limit, reverse, live, old})
 
 Perform the query! limit, reverse, live, old are stardard as with
-other flume streams. `unlinkedValues` is an option that can be used to
+[other flume streams](https://github.com/flumedb/flumelog-offset).
+`unlinkedValues` is an option that can be used to
 include the values not part of the index in the return value.
 
 ### query.explain ({query:MFR_query, limit, reverse, live, old}) => obj
