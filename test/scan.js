@@ -1,14 +1,6 @@
 
 var tape = require('tape')
-var osenv = require('osenv')
-var path = require('path')
 var pull = require('pull-stream')
-var Flume = require('flumedb')
-var FlumeLog = require('flumelog-offset')
-var Query = require('../')
-var rimraf = require('rimraf')
-
-var codec = require('level-codec/lib/encodings')
 
 function all (stream, cb) {
   pull(stream, pull.collect(cb))
@@ -21,27 +13,21 @@ var indexes = [
 var raw = []
 
 
-module.exports = function (log) {
+module.exports = function (append, read, ready) {
 
   tape('simple', function (t) {
 
-    var db = Flume(log)
-              .use('query', Query(1, {indexes: indexes, exact: false}))
-
-    var query = db.query
-
     t.test('init', function (t) {
-      query.since.once(function (v) {
-        t.equal(v, -1)
+      ready(function () {
         t.end()
-
       })
+
     })
 
     var live = []
 
     pull(
-      query.read({query: [{
+      read({query: [{
         $filter: {count: {$gt: 20}}
       }], limit: 10}),
       pull.drain(function (e) {
@@ -57,7 +43,7 @@ module.exports = function (log) {
 
     var load1 = [], end1
 
-    pull(query.read({old: false}), pull.drain(function (msg) {
+    pull(read({old: false}), pull.drain(function (msg) {
       load1.push(msg)
     }, function () {
       //KNOWN BUG: stream ends immediately with empty database
@@ -65,7 +51,7 @@ module.exports = function (log) {
     }))
 
     t.test('load1', function (t) {
-      db.append(data.slice(0, 50), function (err) {
+      append(data.slice(0, 50), function (err) {
         if(err) throw err
         setTimeout(function () {
           //note, live stream doesn't fill at same time as callback.
@@ -78,25 +64,21 @@ module.exports = function (log) {
 
     t.test('load2', function (t) {
       var load2 = []
-      pull(query.read({old: false}), pull.drain(function (msg) {
+      pull(read({old: false}), pull.drain(function (msg) {
         load2.push(msg)
       }, function () {
         throw new Error('stream 2 ended')
       }))
-      db.append(data.slice(50), function (err) {
+      append(data.slice(50), function (err) {
         if(err) throw err
-        //setTimeout(function () {
-  //        t.deepEqual(load1, data)
-  //        console.log("EOAAONETHOANTEHOASTEHSA")
-          t.equal(load2.length, 50, 'LOAD 2 length')
-            t.deepEqual(load2, data.slice(50, 100), 'LOAD 2')
-          t.end()
-        //}, 100)
+        t.equal(load2.length, 50, 'LOAD 2 length')
+        t.deepEqual(load2, data.slice(50, 100), 'LOAD 2')
+        t.end()
       })
     })
 
     function seek(limit, gte) {
-      return query.read({query: [{
+      return read({query: [{
         $filter: { count: {$gte: gte}, okay:true}
       }], limit: limit})
     }
@@ -124,7 +106,7 @@ module.exports = function (log) {
 
     t.test('query for strings', function (t) {
 
-      all(query.read({query: [{
+      all(read({query: [{
         $filter: { mixed: {$is: 'string'}}
       }]}), function (err, ary) {
         if(err) throw err
@@ -139,8 +121,24 @@ module.exports = function (log) {
 
 }
 
+module.exports.indexes = indexes
+
 if(!module.parent) {
-  var seekPath = path.join(osenv.tmpdir(), 'test_stream-view_seek')
-  rimraf.sync(seekPath)
-  module.exports(FlumeLog(path.join(seekPath, 'log.offset'), 1024, codec.json))
+  require('./setup')('test-flumeview-query_scan', module.exports)
+//  var osenv = require('osenv')
+//  var path = require('path')
+//  var Flume = require('flumedb')
+//  var FlumeLog = require('flumelog-offset')
+//  var rimraf = require('rimraf')
+//  var codec = require('level-codec/lib/encodings')
+//
+//  var seekPath = path.join(osenv.tmpdir(), 'test_stream-view_seek')
+//  rimraf.sync(seekPath)
+//  var log = FlumeLog(path.join(seekPath, 'log.offset'), 1024, codec.json)
+//  var db = Flume(log)
+//            .use('query', Query(1, {indexes: indexes, exact: false}))
+//
+//  module.exports(db.append, db.query.read, function (cb) {
+//    db.query.since.once(cb)
+//  })
 }

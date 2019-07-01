@@ -1,1 +1,1 @@
-require('./scan')(require('flumelog-memory')())
+require('./setup')('memory', require('./scan'), true)
