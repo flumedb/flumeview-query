@@ -111,13 +111,19 @@ test('$ne should not be passed to an index', function (t) {
     }
   var result = select(newIndexes, q, true)
   var opts = query(result.index, q, true)
-  charwise.encode(opts.gte)
+  charwise.encode(opts.gte) //would throw if {$ne: ...} was returned
   console.log(result)
   t.end()
 })
 
-
-
-
-
-
+test('value.content.type', function (t) {
+  var q = {
+      value: {
+        content: { type: 'address' }
+      }
+    }
+  var result = select(newIndexes, q, true)
+  var opts = query(result.index, q, true)
+  console.log(opts)
+  t.end()
+})

@@ -93,3 +93,5 @@ module.exports.indexes = indexes
 if(!module.parent) {
   require('./setup')('test-flumeview-query_exact', module.exports)
 }
+
+//require('./setup')('test-kappaview-query_exact', require('flumeview-query/test/exact'))
