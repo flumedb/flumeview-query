@@ -14,7 +14,7 @@ module.exports = function (version, opts) {
   var filter = opts.filter || function () { return true }
   var map = opts.map || function (item) { return item }
   var exact = opts.exact !== false
-
+  var read
   return function (log, name) {
     var indexes = opts.indexes.map(function (e) {
       return {
@@ -55,7 +55,8 @@ module.exports = function (version, opts) {
       })
       return A
     })(log, name)
-    var read = view.read
+
+    read = view.read
 
     view.methods.indexes = 'sync'
     view.indexes = function () { return indexes }
@@ -63,5 +64,3 @@ module.exports = function (version, opts) {
     return view
   }
 }
-
-

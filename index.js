@@ -11,7 +11,7 @@ module.exports = function (version, opts) {
   return function (log, name) {
     if(!log.filename) return require('./memory')(log, name)
     var _view = Indexes(version, opts)(log, name)
-    var view = Inject(log, _view.indexes)
+    var view = Inject(log, _view.indexes())
 
     view.methods = {
       read: 'source',
@@ -22,7 +22,6 @@ module.exports = function (version, opts) {
     view.createSink = _view.createSink
     view.since = _view.since
     view.destroy = _view.destroy
-    console.log(view)
     return view
   }
 }

@@ -46,4 +46,3 @@ module.exports = function (indexes, scan) {
     return _opts
   }
 }
-
