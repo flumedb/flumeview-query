@@ -1,13 +1,9 @@
 'use strict'
 var pull = require('pull-stream')
-var keys = require('map-filter-reduce/keys')
-var u = require('./util')
 var Explain = require('./explain')
 var Filter = require('./filter')
 
 var isArray = Array.isArray
-var isNumber = function (n) { return 'number' === typeof n }
-var isObject = function (o) { return o && 'object' === typeof o && !isArray(o) }
 function isFunction (f) { return 'function' == typeof f }
 
 function clone (obj) {

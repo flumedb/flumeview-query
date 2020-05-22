@@ -21,6 +21,7 @@ module.exports = function (version, opts) {
 
     view.createSink = _view.createSink
     view.since = _view.since
+    view.close = _view.close
     view.destroy = _view.destroy
     return view
   }
