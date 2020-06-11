@@ -1,4 +1,3 @@
-
 var tape = require('tape')
 var u = require('../util')
 
@@ -45,7 +44,3 @@ tape('get', function (t) {
   })
   t.end()
 })
-
-
-
-

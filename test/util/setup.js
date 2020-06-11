@@ -1,4 +1,4 @@
-var Query = require('../')
+var Query = require('../..')
 
 module.exports = function (name, tests, memory) {
   var osenv = require('osenv')
@@ -11,11 +11,10 @@ module.exports = function (name, tests, memory) {
 
   var seekPath = path.join(osenv.tmpdir(), name)
   rimraf.sync(seekPath)
-  var log = (
-    memory
-      ? FlumelogMemory()
-      : FlumeLogOffset(path.join(seekPath, 'log.offset'), 1024, codec.json)
-  )
+  var log = memory
+    ? FlumelogMemory()
+    : FlumeLogOffset(path.join(seekPath, 'log.offset'), { blockSize: 1024, codec: codec.json })
+
   var db = Flume(log)
     .use('query', Query(1, { indexes: tests.indexes, exact: false }))
 

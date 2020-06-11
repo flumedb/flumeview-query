@@ -1,1 +1,1 @@
-require('./setup')('memory', require('./scan'), true)
+require('./util/setup')('memory', require('./util/scan'), true)

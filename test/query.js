@@ -1,7 +1,7 @@
 var tape = require('tape')
+var Q = require('map-filter-reduce/util')
 var select = require('../select')
 var query = require('../query')
-var Q = require('map-filter-reduce/util')
 
 var indexes = [
   {key: 'SDR', value: ['source', 'dest', 'rel']},

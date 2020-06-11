@@ -4,12 +4,12 @@ var path = require('path')
 var pull = require('pull-stream')
 var Flume = require('flumedb')
 var FlumeLog = require('flumelog-offset')
-var Query = require('../')
 var rimraf = require('rimraf')
 var timestamp = require('monotonic-timestamp')
 var MFR = require('map-filter-reduce')
-
 var codec = require('level-codec/lib/encodings')
+
+var Query = require('../')
 
 var indexes = [
   { key: 'i', value: ['index'] },
@@ -23,20 +23,22 @@ var indexes = [
   { key: 'it', value: [['index'], ['timestamp']] },
 ]
 
-
 var dbPath = path.join(osenv.tmpdir(), 'test_stream-view_random')
 rimraf.sync(dbPath)
 
-var db = Flume(FlumeLog(path.join(dbPath, 'log.offset'), 1024, codec.json))
-          .use('queryRandom', Query(1, {indexes: indexes}))
+var log = FlumeLog(
+  path.join(dbPath, 'log.offset'),
+  { blockSize: 1024, codec: codec.json }
+)
+var db = Flume(log)
+  .use('query', Query(1, {indexes: indexes}))
 
-var query = db.queryRandom
+var query = db.query
 
 test('preinit', function (t) {
   query.since.once(function (v) {
     t.equal(v, -1)
     t.end()
-
   })
 })
 

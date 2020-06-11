@@ -8,7 +8,7 @@
     "url": "git://github.com/flumedb/flumeview-query.git"
   },
   "scripts": {
-    "test": "for t in test/*.js; do node $t; done",
+    "test": "tape test/*.js",
     "test:pretty": "npm test | tap-spec",
     "test:classic": "set -e; for t in test/*.js; do node $t; done"
   },
