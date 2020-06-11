@@ -27,7 +27,7 @@ var data = [
 
 module.exports = function (append, read, ready) {
 
-  tape('simple', function (t) {
+  tape('nested-links', function (t) {
 //    var linksPath = path.join(osenv.tmpdir(), 'test_stream-view_links')
 //    rimraf.sync(linksPath)
 //
@@ -93,7 +93,6 @@ module.exports = function (append, read, ready) {
     })
 
   })
-
 }
 
 module.exports.indexes = indexes

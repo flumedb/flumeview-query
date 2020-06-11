@@ -1,4 +1,3 @@
-
 var tape = require('tape')
 var pull = require('pull-stream')
 
@@ -10,18 +9,12 @@ var indexes = [
   { key: 'S', value: ['okay'] },
 ]
 
-var raw = []
-
-
 module.exports = function (append, read, ready) {
-
-  tape('simple', function (t) {
-
+  tape('scan', function (t) {
     t.test('init', function (t) {
       ready(function () {
         t.end()
       })
-
     })
 
     var live = []

@@ -16,10 +16,12 @@ module.exports =  function createMemoryIndex (log, name) {
  return {
     since: log.since,
     get: log.get,
-    methods: { get: 'async', read: 'source'},
+    methods: { get: 'async', read: 'source' },
     read: function (opts) {
       return Filter(fullScan(log, opts), opts)
     },
-    createSink: function (cb) {return pull.onEnd(cb) }
+    createSink: function (cb) {return pull.onEnd(cb) },
+    close: done => done(),
+    destroy: done => done()
   }
 }

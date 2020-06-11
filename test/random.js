@@ -1,4 +1,3 @@
-
 var test = require('tape')
 var osenv = require('osenv')
 var path = require('path')
@@ -12,10 +11,6 @@ var MFR = require('map-filter-reduce')
 
 var codec = require('level-codec/lib/encodings')
 
-function all (stream, cb) {
-  pull(stream, pull.collect(cb))
-}
-
 var indexes = [
   { key: 'i', value: ['index'] },
   { key: 'r', value: ['random'] },
@@ -28,16 +23,14 @@ var indexes = [
   { key: 'it', value: [['index'], ['timestamp']] },
 ]
 
-var raw = []
-
 
 var dbPath = path.join(osenv.tmpdir(), 'test_stream-view_random')
 rimraf.sync(dbPath)
 
 var db = Flume(FlumeLog(path.join(dbPath, 'log.offset'), 1024, codec.json))
-          .use('query', Query(1, {indexes: indexes}))
+          .use('queryRandom', Query(1, {indexes: indexes}))
 
-var query = db.query
+var query = db.queryRandom
 
 test('preinit', function (t) {
   query.since.once(function (v) {
@@ -130,7 +123,7 @@ function randomTest (n) {
       MFR(q),
       pull.collect(function (err, ary) {
         pull(
-          db.query.read({query: q}),
+          query.read({query: q}),
           pull.collect(function (err, _ary) {
             t.equal(_ary.length, ary.length)
             if(_ary.length != ary.length)
