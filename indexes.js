@@ -38,7 +38,7 @@ module.exports = function (version, opts) {
       }
     })
 
-    var view = FlumeViewLevel(version || 2, function (data, seq) {
+    var view = FlumeViewLevel(version || 3, function (data, seq) {
       data = map(data)
       if (!filter(data)) return []
       var A = []
