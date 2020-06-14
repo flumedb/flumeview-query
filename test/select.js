@@ -1,4 +1,3 @@
-var u = require('map-filter-reduce/util')
 var tape = require('tape')
 var select = require('../select')
 var indexes = [

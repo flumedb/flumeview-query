@@ -10,6 +10,7 @@ module.exports = function (version, opts) {
   if(!isObject(opts)) throw new Error('flumeview-query: expected opts as second arg')
   return function (log, name) {
     if(!log.filename) return require('./memory')(log, name)
+
     var _view = Indexes(version, opts)(log, name)
     var view = Inject(log, _view.indexes())
 

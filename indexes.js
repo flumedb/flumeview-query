@@ -9,7 +9,6 @@ function clone (obj) {
   return o
 }
 
-
 module.exports = function (version, opts) {
   var filter = opts.filter || function () { return true }
   var map = opts.map || function (item) { return item }
